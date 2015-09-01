@@ -392,9 +392,11 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 			while ((line = br.readLine()) != null) {
 				StringBuilder newLine = new StringBuilder();
 				String[] parts = line.split(" ");
-				for (int x = 1; x < parts.length; x++)
+				for (int x = 1; x < parts.length; x++) {
 					newLine.append(parts[x] + " ");
-				newLine.append(rand.nextInt(1000));
+					if (x == 5)
+						newLine.append(rand.nextInt(1000) + " ");
+				}
 				brr.write(newLine.toString() +  "\n");
 			}
 			brr.flush();
