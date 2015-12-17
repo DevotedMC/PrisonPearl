@@ -14,6 +14,7 @@ prison_resetbed: false
 chunk_delay: 1200
 ppsummon_clear_inventory: false
 ppreturn_kills: false
+fixMissingPearls: false
 prison_motd:
    - You are trapped in this bleak and endless world
    - by a prison pearl.
