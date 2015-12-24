@@ -450,7 +450,6 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 	private static void save(SaveLoad obj, File file) {
 		try {
 			if (globalInstance.getMysqlStorage() != null) {
-				obj.save(null);
 				return;
 			}
 			File newfile = new File(file.getAbsolutePath() + ".new");
