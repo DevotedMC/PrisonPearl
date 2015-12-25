@@ -14,9 +14,7 @@ import vg.civcraft.mc.mercury.events.AsyncPluginBroadcastMessageEvent;
 public class MercuryListener implements Listener{
 	
 	public static String[] channels = {
-		"PrisonPearlUpdate",
-		"PrisonPearlTransfer",
-		"PrisonPearlMove"
+		"PrisonPearlUpdate"
 	};
 	
 	private final PrisonPearlPlugin plugin;
@@ -34,21 +32,6 @@ public class MercuryListener implements Listener{
 		
 		if(channel.equals(channels[0]))
 			pearlUpdate(message);
-		else if(channel.equals(channels[1]))
-			pearlTransfer(message);
-		else if(channel.equals(channels[2]))
-			PrisonPearlMove(message);
-	}
-	
-	private void pearlTransfer(String message){
-		String[] parts = message.split(" ");
-		UUID holder = UUID.fromString(parts[0]);
-		UUID pearl = UUID.fromString(parts[1]);
-		PrisonPearl pp = pearls.getByImprisoned(pearl);
-		Player p = Bukkit.getPlayer(holder);
-		if (p == null) // Player is not on the server.
-			return; // Some other server will pick it up.
-		pp.setHolder(p);
 	}
 	
 	private void pearlUpdate(String message){
@@ -78,12 +61,5 @@ public class MercuryListener implements Listener{
 			PrisonPearl pp = pearls.getByImprisoned(id);
 			pearls.deletePearl(pp, "This pearl was freed on another server. Removing instance.");
 		}
-	}
-	
-	private void PrisonPearlMove(String message){
-		String[] parts = message.split(" ");
-		UUID uuid = UUID.fromString(parts[0]);
-		FakeLocation loc = new FakeLocation(parts[1], Double.parseDouble(parts[2]), Double.parseDouble(parts[3]),
-				Double.parseDouble(parts[4]));
 	}
 }

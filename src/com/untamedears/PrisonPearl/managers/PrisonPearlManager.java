@@ -86,12 +86,7 @@ public class PrisonPearlManager implements Listener {
 	public boolean imprisonPlayer(Player imprisoned, Player imprisoner) {
 		return imprisonPlayer(imprisoned.getUniqueId(), imprisoner);
 	}
-
-	/**
-	 * @param imprisonedname
-	 * @param imprisoner
-	 * @return
-	 */
+	
 	/**
 	 * @param imprisonedname
 	 * @param imprisoner
@@ -199,7 +194,7 @@ public class PrisonPearlManager implements Listener {
 		// Reason for edit: Gives pearl enchantment effect (distinguishable, unstackable) Gives name of prisoner in inventory.
 
 
-                //check if imprisoned was imprisoned by themselves
+        //check if imprisoned was imprisoned by themselves
 		if(imprisoner.getUniqueId() == pp.getImprisonedId()){
 			//ok player imprisoned themselves throw the pearl on the floor
 			imprisoner.getWorld().dropItem(imprisoner.getLocation(), is);
@@ -794,7 +789,7 @@ public class PrisonPearlManager implements Listener {
 			if ((p = pp.getHolderPlayer()) != null){
 				message += " " + p.getName();
 			}
-			MercuryAPI.instance.sendMessage(message, "PrisonPearlUpdate");
+			MercuryAPI.sendMessage(message, "PrisonPearlUpdate");
 		}
 	}
 

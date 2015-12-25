@@ -59,6 +59,8 @@ import com.untamedears.PrisonPearl.managers.PrisonPortaledPlayerManager;
 import com.untamedears.PrisonPearl.managers.SummonManager;
 import com.untamedears.PrisonPearl.managers.WorldBorderManager;
 
+import vg.civcraft.mc.bettershards.BetterShardsAPI;
+import vg.civcraft.mc.bettershards.events.PlayerChangeServerReason;
 import vg.civcraft.mc.mercury.MercuryAPI;
 import vg.civcraft.mc.namelayer.NameAPI;
 
@@ -90,6 +92,7 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 	private boolean isNameLayer;
 	private boolean isMercury;
 	private boolean isWorldBorder;
+	private boolean isBetterShards;
 	private PrisonPearlMysqlStorage mysqlStorage = null;
 	
 	private Map<String, PermissionAttachment> attachments;
@@ -100,6 +103,7 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 		isNameLayer = Bukkit.getPluginManager().isPluginEnabled("NameLayer");
 		isMercury = Bukkit.getPluginManager().isPluginEnabled("Mercury");
 		isWorldBorder = Bukkit.getPluginManager().isPluginEnabled("WorldBorder");
+		isBetterShards = Bukkit.getPluginManager().isPluginEnabled("BetterShards");
 		globalInstance = this;
 		File dat = getDataFolder();
 		data=dat;
@@ -192,6 +196,9 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 				}
 				
 			}, 300, 150);
+		}
+		if (isBetterShards) {
+			getServer().getPluginManager().registerEvents(new BetterShardsListener(), this);
 		}
 	}
 
@@ -577,8 +584,17 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 	
 	// gets where the player should be respawned at
 	// returns null if the curloc is an acceptable respawn location
-	private Location getRespawnLocation(Player player, Location curloc) {	
-		if (pearls.isImprisoned(player)) { // if player is imprisoned
+	private Location getRespawnLocation(Player player, Location curloc) {
+		if (isMercury && isBetterShards) {
+			if (pearls.isImprisoned(player)) {
+				String server = MercuryAPI.serverName();
+				if (!server.equals(getConfig().getString("prison_server"))) {
+					BetterShardsAPI.connectPlayer(player, server, PlayerChangeServerReason.PLUGIN);
+					return null;
+				}
+			}
+			
+		} else if (pearls.isImprisoned(player)) { // if player is imprisoned
 			if (summonman.isSummoned(player)) { // if summoned
 				return null; // don't modify location
             } else if (curloc.getWorld() != getPrisonWorld()) { // but not in prison world
@@ -1218,12 +1234,17 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
     public boolean isWorldBorder(){
     	return isWorldBorder;
     }
+    
     public boolean isMercuryLoaded(){
     	return isMercury;
     }
     
     public boolean isNameLayerLoaded(){
     	return isNameLayer;
+    }
+    
+    public boolean isBetterShardsEnabled(){
+    	return isBetterShards;
     }
     
     public PrisonPearlMysqlStorage getMysqlStorage(){
