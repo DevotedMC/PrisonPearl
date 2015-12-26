@@ -588,8 +588,9 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 		if (isMercury && isBetterShards) {
 			if (pearls.isImprisoned(player)) {
 				String server = MercuryAPI.serverName();
-				if (!server.equals(getConfig().getString("prison_server"))) {
-					BetterShardsAPI.connectPlayer(player, server, PlayerChangeServerReason.PLUGIN);
+				String toServer = getConfig().getString("prison_server");
+				if (!server.equals(toServer)) {
+					BetterShardsAPI.connectPlayer(player, toServer, PlayerChangeServerReason.PLUGIN);
 					return null;
 				}
 			}
