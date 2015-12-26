@@ -1261,7 +1261,7 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
     		Location loc = pp.getLocation();
     		String message = uuid.toString() + " " + loc.getWorld().getName() + " " + loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockZ() + " " +
     				pp.getUniqueIdentifier() + " " + pp.getMotd();
-    		MercuryAPI.instance.sendMessage(message, "PrisonPearlMove");
+    		MercuryAPI.sendMessage(message, "PrisonPearlMove");
     	}
     }
 }
