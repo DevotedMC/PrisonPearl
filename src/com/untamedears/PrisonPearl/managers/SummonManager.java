@@ -247,7 +247,9 @@ public class SummonManager implements Listener, SaveLoad {
 	@EventHandler(priority=EventPriority.MONITOR)
 	public void onPrisonPearlEvent(PrisonPearlEvent event) {
 		if (event.getType() == PrisonPearlEvent.Type.FREED) {
-			summons.remove(event.getPrisonPearl().getImprisonedId());
+			PrisonPearl pp = event.getPrisonPearl();
+			UUID uuid = pp.getImprisonedId();
+			summons.remove(uuid);
 			dirty = true;
 		}
 	}

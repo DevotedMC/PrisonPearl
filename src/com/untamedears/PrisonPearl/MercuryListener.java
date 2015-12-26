@@ -3,6 +3,8 @@ package com.untamedears.PrisonPearl;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -29,19 +31,20 @@ public class MercuryListener implements Listener{
 		this.plugin = plugin;
 		manager = PrisonPearlPlugin.getPrisonPearlManager();
 		pearls = storage;
-		MercuryAPI.addChannels(channels);
 	}
 
 	@EventHandler()
-	public void merucyrListener(AsyncPluginBroadcastMessageEvent event){
+	public void mercuryListener(AsyncPluginBroadcastMessageEvent event){
 		String channel = event.getChannel();
 		String message = event.getMessage();
+		if (event.getOriginServer().equals(MercuryAPI.serverName()))
+			return;
 		
-		if(channel.equals(channels[0]))
+		if(channel.equalsIgnoreCase(channels[0]))
 			pearlUpdate(message);
-		else if(channel.equals(channels[1]))
+		else if(channel.equalsIgnoreCase(channels[1]))
 			pearlTransfer(message);
-		else if(channel.equals(channels[2]))
+		else if(channel.equalsIgnoreCase(channels[2]))
 			PrisonPearlMove(message);
 	}
 	
@@ -69,8 +72,8 @@ public class MercuryListener implements Listener{
 			player = parts[8];
 		
 		if (type.equals(PrisonPearlEvent.Type.NEW)){
-			
 			PrisonPearl pp = new PrisonPearl(name, id, loc, unique);
+			pp.setHolder(loc);
 			pearls.addPearl(pp);
 			return;
 		}
@@ -81,14 +84,15 @@ public class MercuryListener implements Listener{
 		}
 		else if (type.equals(PrisonPearlEvent.Type.FREED)){
 			PrisonPearl pp = pearls.getByImprisoned(id);
-			manager.freePearl(pp, "This pearl was freed on another server. Removing instance.");
+			manager.freePearlFromMercury(pp, "This pearl was freed on another server. Removing instance.");
 		}
 	}
 	
 	private void PrisonPearlMove(String message){
 		String[] parts = message.split(" ");
 		UUID uuid = UUID.fromString(parts[0]);
-		FakeLocation loc = new FakeLocation(parts[1], Double.parseDouble(parts[2]), Double.parseDouble(parts[3]),
+		String world = parts[1];
+		FakeLocation loc = new FakeLocation(world, Double.parseDouble(parts[2]), Double.parseDouble(parts[3]),
 				Double.parseDouble(parts[4]));
 		PrisonPearl pp = pearls.getByImprisoned(uuid);
 		pp.setHolder(loc);

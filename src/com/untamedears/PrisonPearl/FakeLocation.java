@@ -42,6 +42,11 @@ public class FakeLocation extends Location{
 		super(new FakeWorld(world), x, y, z);
 	}
 	
+	@Override
+	public Location clone() {
+		return null;
+	}
+	
 	static public class FakeWorld implements World{
 		String name;
 		

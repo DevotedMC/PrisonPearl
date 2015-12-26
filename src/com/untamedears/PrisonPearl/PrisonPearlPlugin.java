@@ -60,6 +60,7 @@ import com.untamedears.PrisonPearl.managers.SummonManager;
 import com.untamedears.PrisonPearl.managers.WorldBorderManager;
 
 import vg.civcraft.mc.bettershards.BetterShardsAPI;
+import vg.civcraft.mc.bettershards.BetterShardsPlugin;
 import vg.civcraft.mc.bettershards.events.PlayerChangeServerReason;
 import vg.civcraft.mc.mercury.MercuryAPI;
 import vg.civcraft.mc.namelayer.NameAPI;
@@ -187,7 +188,7 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 		
 		if (isMercury){
 			getServer().getPluginManager().registerEvents(new MercuryListener(this, pearls), this);
-			MercuryAPI.instance.registerPluginMessageChannel(MercuryListener.channels);
+			MercuryAPI.registerPluginMessageChannel(MercuryListener.channels);
 			Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable(){
 
 				@Override
@@ -592,7 +593,24 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 				if (!server.equals(toServer)) {
 					BetterShardsAPI.connectPlayer(player, toServer, PlayerChangeServerReason.PLUGIN);
 					return null;
+				} else if (curloc.getWorld() != getPrisonWorld()){
+					return getPrisonSpawnLocation(); // should bre respawned in prison
 				}
+			} else if (curloc.getWorld() == getPrisonWorld() && !portalman.isPlayerPortaledToPrison(player)) { // not imprisoned, but spawning in prison?
+				if (BetterShardsAPI.hasBed(player.getUniqueId())) {
+					return null;
+				}
+				else if (getConfig().getBoolean("free_respawn")) { // if we should respawn instead of tp to spawn
+					return RESPAWN_PLAYER; // kill the player
+	            } else {
+	            	World world = getFreeWorld();
+	            	String toServer = getConfig().getString("free_server");
+	            	if (world == null) {
+	            		BetterShardsAPI.connectPlayer(player, toServer, PlayerChangeServerReason.PLUGIN);
+	            		return null;
+	            	}
+					return world.getSpawnLocation(); // otherwise, respawn him at the spawn of the free world
+	            }
 			}
 			
 		} else if (pearls.isImprisoned(player)) { // if player is imprisoned
@@ -726,14 +744,16 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 				if (!player.isDead() && currentLoc.getWorld() == getPrisonWorld()) {
 					// if the player isn't dead and is in prison world
 					Location loc = null;
-					if (getConfig().getBoolean("free_tppearl")) // if we tp to pearl on players being freed
+					if (getConfig().getBoolean("free_tppearl")) { // if we tp to pearl on players being freed
 						loc = fuzzLocation(pp.getLocation()); // get the location of the pearl
-					if (loc == null) // if we don't have a location yet
+					}
+					if (loc == null || loc instanceof FakeLocation) // if we don't have a location yet
 						loc = getRespawnLocation(player, currentLoc); // get the respawn location for the player
 
 					if (loc == RESPAWN_PLAYER) { // if we're supposed to respawn the player
 						player.setHealth(0.0); // kill him
 					} else {
+						System.out.println(loc);
 						player.teleport(loc); // otherwise teleport
 					}
 				}
@@ -923,6 +943,8 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 
 		double rad = Math.random()*Math.PI*2;
 		Location newloc = loc.clone();
+		if (newloc == null)
+			return null;
 		newloc.add(1.2*Math.cos(rad), 1.2*Math.sin(rad), 0);
 		return newloc;
 	}
@@ -1259,9 +1281,12 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
     	for (UUID uuid: uuids){
     		PrisonPearl pp = pearls.getByImprisoned(uuid);
     		Location loc = pp.getLocation();
+    		
+    		if (loc instanceof FakeLocation)
+    			continue; // If it isn't your pearl don't worry about it.  The server that has it will send the messages.
     		String message = uuid.toString() + " " + loc.getWorld().getName() + " " + loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockZ() + " " +
     				pp.getUniqueIdentifier() + " " + pp.getMotd();
-    		MercuryAPI.sendMessage(message, "PrisonPearlMove");
+    		MercuryAPI.sendGlobalMessage(message, "PrisonPearlMove");
     	}
     }
 }

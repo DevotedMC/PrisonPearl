@@ -131,7 +131,7 @@ public class PrisonPearl {
     }
 
     public BlockState getHolderBlockState(final Holder holder) {
-        if (holder != null && holder.blocklocation != null) {
+        if (holder != null && holder.blocklocation != null && !(holder.blocklocation instanceof FakeLocation)) {
             return holder.blocklocation.getBlock().getState();
         }
         return null;
@@ -181,7 +181,7 @@ public class PrisonPearl {
 				return "an unknown block"; 
 			}
 		} else if (holder.supposedPearlLocation != null){
-			return "another server";
+			return "another player on another server";
 		}
 		else {
 			PrisonPearlPlugin.info("PrisonPearl " + imprisonedId.toString() + " has no player, item, nor location");
@@ -376,6 +376,14 @@ public class PrisonPearl {
     }
     
     public void setHolder(Location location) {
+        this.holders.addFirst(new Holder(location));
+        this.pearlOnCursor = false;
+        while (this.holders.size() > PrisonPearl.HOLDER_COUNT) {
+            this.holders.removeLast();
+        }
+    }
+    
+    public void setHolder(FakeLocation location) {
         this.holders.addFirst(new Holder(location));
         this.pearlOnCursor = false;
         while (this.holders.size() > PrisonPearl.HOLDER_COUNT) {

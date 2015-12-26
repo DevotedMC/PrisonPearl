@@ -56,6 +56,7 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitTask;
 
+import vg.civcraft.mc.bettershards.events.PlayerChangeServerEvent;
 import vg.civcraft.mc.mercury.MercuryAPI;
 import vg.civcraft.mc.namelayer.NameAPI;
 
@@ -229,6 +230,16 @@ public class PrisonPearlManager implements Listener {
 		updateLocationToMercury(pp, PrisonPearlEvent.Type.FREED);
 		return true;
 	}
+	
+	public boolean freePearlFromMercury(PrisonPearl pp, String reason) {
+		pearls.deletePearlMercuryCase(pp);
+		// set off an event
+		prisonPearlEvent(pp, PrisonPearlEvent.Type.FREED);
+		// unban alts and players if they are allowed to be
+		plugin.checkBan(pp.getImprisonedId());
+		plugin.checkBanForAlts(pp.getImprisonedId());
+		return true;
+	}
 
 	// Announce the person in a pearl when a player holds it
 	@EventHandler(priority = EventPriority.MONITOR)
@@ -320,6 +331,21 @@ public class PrisonPearlManager implements Listener {
 			world.dropItemNaturally(loc, item);  // drops pearl to ground.
 		}
 		player.saveData();
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR)
+	public void playerChangeServerEvent(PlayerChangeServerEvent event) {
+		Inventory inv = Bukkit.getPlayer(event.getPlayerUUID()).getInventory();
+		for (Entry<Integer, ? extends ItemStack> entry :
+				inv.all(Material.ENDER_PEARL).entrySet()) {
+			ItemStack item = entry.getValue();
+			PrisonPearl pp = pearls.getByItemStack(item);
+			if (pp == null) {
+				continue;
+			}
+			updateTransferToMercury(event.getPlayerUUID(), pp.getImprisonedId());
+		}
+		PrisonPearlStorage.playerIsTransfering(event.getPlayerUUID());
 	}
 
 	// Drops a pearl when a player leaves.
@@ -784,12 +810,13 @@ public class PrisonPearlManager implements Listener {
 			Location loc = pp.getLocation();
 			message = type.name() + " " + pp.getImprisonedId().toString() + " " + pp.getImprisonedName() + " " +
 			loc.getWorld().getName() + " " + loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockZ();
+			message += " " + pp.getUniqueIdentifier();
 			
 			Player p;
 			if ((p = pp.getHolderPlayer()) != null){
 				message += " " + p.getName();
 			}
-			MercuryAPI.sendMessage(message, "PrisonPearlUpdate");
+			MercuryAPI.sendGlobalMessage(message, "PrisonPearlUpdate");
 		}
 	}
 
@@ -804,5 +831,11 @@ public class PrisonPearlManager implements Listener {
 		String uuid = lore.get(1).split(" ")[1];
 		int unique = Integer.parseInt(lore.get(2).split(" ")[1]);
 		return uuid.equals(pp.getImprisonedId().toString()) && unique == pp.getUniqueIdentifier();
+	}
+	
+	private void updateTransferToMercury(UUID imprisoner, UUID pearled) {
+		String message = "";
+		message += imprisoner.toString() + " " + pearled.toString();
+		MercuryAPI.sendGlobalMessage(message, "PrisonPearlTransfer");
 	}
 }

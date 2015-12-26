@@ -262,6 +262,11 @@ public class PrisonPearlStorage implements SaveLoad {
 		real_inv.setItem(pearlslot, new ItemStack(Material.ENDER_PEARL));
 	}
 	
+	// We need to remove the pearl from list without doing anything else.
+	public void deletePearlMercuryCase(PrisonPearl pp) {
+		pearls_byimprisoned.remove(pp.getImprisonedId());
+	}
+	
 	public void deletePearl(PrisonPearl pp, String reason) {
 		removePearlFromContainer(pp);
 		pearls_byimprisoned.remove(pp.getImprisonedId());
@@ -350,6 +355,9 @@ public class PrisonPearlStorage implements SaveLoad {
 		else
 			prisoner = Bukkit.getOfflinePlayer(prisonerId).getName();
 		ItemStack is = new ItemStack(Material.ENDER_PEARL, 1);
+		if (inv == null) {
+			return false;
+		}
 		for (ItemStack existing_is: inv.getContents()) {
 			if (existing_is == null || existing_is.getType() != Material.ENDER_PEARL)
 				continue;
@@ -543,7 +551,6 @@ public class PrisonPearlStorage implements SaveLoad {
     	if (pearl == null)
     		return null;
     	int id = Integer.parseInt(lore.get(2).split(" ")[1]);
-    	System.out.println(pearl.getImprisonedId().toString() + " " + id);
     	if (pearl.getUniqueIdentifier() != id)
     		return null;
     	return pearl;
