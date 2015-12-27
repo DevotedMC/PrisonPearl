@@ -14,6 +14,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
 
+import vg.civcraft.mc.mercury.MercuryAPI;
 import vg.civcraft.mc.namelayer.NameAPI;
 
 import com.untamedears.PrisonPearl.FakeLocation;
@@ -26,10 +27,12 @@ public class PrisonPearlMysqlStorage {
 
 	private Database db;
 	private boolean isNameLayer;
+	private boolean isMercury;
 
 	public PrisonPearlMysqlStorage(PrisonPearlPlugin plugin) {
 		PPConfig config = plugin.getPPConfig();
 		isNameLayer = plugin.isNameLayerLoaded();
+		isMercury = plugin.isMercuryLoaded();
 		String host = config.getMysqlHost();
 		String dbname = config.getMysqlDbname();
 		String user = config.getMysqlUsername();
@@ -69,13 +72,14 @@ public class PrisonPearlMysqlStorage {
 				+ "canBreak tinyint(1),"
 				+ "primary key uuid_key(uuid));");
 		db.execute("create table if not exists FeedDelay("
-				+ "lastRestart long not null);");
+				+ "lastRestart bigint not null default 0,"
+				+ "server varchar(255) not null);");
 	}
 
 	private PreparedStatement addPearl, removePearl, getPearl, getAllPearls, updatePearl;
 	private PreparedStatement addPortaledPlayer, removePortaledPlayer, getAllPortaledPlayers;
 	private PreparedStatement addSummonedPlayer, removeSummonedPlayer, updateSummonedPlayer, getAllSummonedPlayer;
-	private PreparedStatement updateLastRestart, getLastRestart;
+	private PreparedStatement updateLastRestart, getLastRestart, insertFirstRestart;
 	
 	public void initializeStatements() {
 		addPearl = db.prepareStatement("insert into PrisonPearls(uuid, world, x, y, z, uq, motd)"
@@ -101,9 +105,11 @@ public class PrisonPearlMysqlStorage {
 				+ "and damage = ? and canSpeak = ? and canDamage = ? and canBreak = ? "
 				+ "where uuid = ?;");
 		getAllSummonedPlayer = db.prepareStatement("select * from PrisonPearlSummon;");
+		
+		insertFirstRestart = db.prepareStatement("insert into FeedDelay(lastRestart, server) values(?, ?);");
 		updateLastRestart = db.prepareStatement("update FeedDelay "
-				+ "set lastRestart = ?;");
-		getLastRestart = db.prepareStatement("select * from FeedDelay");
+				+ "set lastRestart = ? where server = ?;");
+		getLastRestart = db.prepareStatement("select * from FeedDelay where server = ?");
 	}
 
 	public void reconnectAndReinitialize() {
@@ -326,8 +332,12 @@ public class PrisonPearlMysqlStorage {
 	}
 	
 	public void updateLastRestart(long lastRestart) {
+		String server = "bukkit";
+		if (isMercury)
+			server = MercuryAPI.serverName();
 		try {
 			updateLastRestart.setLong(1, lastRestart);
+			updateLastRestart.setString(2, server);
 			updateLastRestart.execute();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -337,9 +347,17 @@ public class PrisonPearlMysqlStorage {
 	public long getLastRestart() {
 		long lastRestart = 0;
 		try {
+			String server = "bukkit";
+			if (isMercury)
+				server = MercuryAPI.serverName();
+			getLastRestart.setString(1, server);
 			ResultSet set = getLastRestart.executeQuery();
-			if (!set.next())
-				return lastRestart;
+			if (!set.next()) {
+				insertFirstRestart.setLong(1, System.currentTimeMillis());
+				insertFirstRestart.setString(2, server);
+				insertFirstRestart.execute();
+				return getLastRestart();
+			}
 			lastRestart = set.getLong("lastRestart");
 		} catch (SQLException e) {
 			e.printStackTrace();
