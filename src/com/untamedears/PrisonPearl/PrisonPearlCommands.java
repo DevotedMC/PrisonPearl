@@ -23,6 +23,7 @@ import com.untamedears.PrisonPearl.managers.PrisonPearlManager;
 import com.untamedears.PrisonPearl.managers.SummonManager;
 import com.untamedears.PrisonPearl.managers.WorldBorderManager;
 
+import vg.civcraft.mc.mercury.MercuryAPI;
 import vg.civcraft.mc.namelayer.NameAPI;
 
 class PrisonPearlCommands implements CommandExecutor {
@@ -646,8 +647,15 @@ class PrisonPearlCommands implements CommandExecutor {
             return true;
         }
         if (pp.getImprisonedPlayer() == null || pp.getImprisonedPlayer().isDead()) {
-            sender.sendMessage(pp.getImprisonedName() + " cannot be summoned");
-            return true;
+        	if (plugin.isMercuryLoaded() && plugin.isBetterShardsEnabled()) {
+        		if (!MercuryAPI.getAllPlayers().contains(pp.getImprisonedName())) {
+        			sender.sendMessage(pp.getImprisonedName() + " cannot be summoned");
+                	return true;
+        		}
+        	} else {
+        		sender.sendMessage(pp.getImprisonedName() + " cannot be summoned");
+            	return true;
+        	}
         } else if (pp.getImprisonedPlayer() == player) {
             sender.sendMessage("You cannot summon yourself!");
             return true;
@@ -656,7 +664,7 @@ class PrisonPearlCommands implements CommandExecutor {
             return true;
         }
         if (summonman.summonPearl(pp))
-            sender.sendMessage("You've summoned " + pp.getImprisonedName());
+            sender.sendMessage("Attempting to summon " + pp.getImprisonedName());
         else
             sender.sendMessage("You failed to summon " + pp.getImprisonedName());
         return true;

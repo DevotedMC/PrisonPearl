@@ -22,6 +22,9 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 
+import vg.civcraft.mc.bettershards.BetterShardsAPI;
+import vg.civcraft.mc.mercury.MercuryAPI;
+
 import com.untamedears.PrisonPearl.PrisonPearl;
 import com.untamedears.PrisonPearl.PrisonPearlPlugin;
 import com.untamedears.PrisonPearl.PrisonPearlStorage;
@@ -149,8 +152,30 @@ public class SummonManager implements Listener, SaveLoad {
         }
 	}
 	
+	// Only will be used by sharding.
+	public void addSummonPearl(PrisonPearl pp) {
+		Summon summon = new Summon(pp.getImprisonedId(), null, plugin.getConfig().getInt("summon_damage_radius"), plugin.getConfig().getInt("summon_damage_amt"), canSpeakDefault, canDamageDefault, canBreakDefault);
+		summons.put(summon.getSummonedId(), summon);
+	}
+	
 	public boolean summonPearl(PrisonPearl pp) {
 		Player player = pp.getImprisonedPlayer();
+		// Start here for mercury sharding 
+		if (player == null && plugin.isBetterShardsEnabled() && plugin.isMercuryLoaded()) {
+			UUID uuid = pp.getImprisonedId();
+			if (summons.containsKey(uuid) || !MercuryAPI.getAllAccounts().contains(uuid))
+				return false;
+			
+			Summon summon = new Summon(uuid, null, plugin.getConfig().getInt("summon_damage_radius"), plugin.getConfig().getInt("summon_damage_amt"), canSpeakDefault, canDamageDefault, canBreakDefault);
+			plugin.checkToSummon.add(uuid);
+			summons.put(summon.getSummonedId(), summon);
+			
+			if (!summonEvent(pp, SummonEvent.Type.SUMMONED, pp.getLocation())) {
+				summons.remove(uuid);
+				return false;
+			}
+			return true;
+		}
 		if (player == null || player.isDead())
 			return false;
 		

@@ -54,6 +54,7 @@ import com.untamedears.PrisonPearl.managers.BanManager;
 import com.untamedears.PrisonPearl.managers.BroadcastManager;
 import com.untamedears.PrisonPearl.managers.CombatTagManager;
 import com.untamedears.PrisonPearl.managers.DamageLogManager;
+import com.untamedears.PrisonPearl.managers.MercuryManager;
 import com.untamedears.PrisonPearl.managers.PrisonPearlManager;
 import com.untamedears.PrisonPearl.managers.PrisonPortaledPlayerManager;
 import com.untamedears.PrisonPearl.managers.SummonManager;
@@ -145,6 +146,7 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 		broadcastman = new BroadcastManager();
 		combatTagManager = new CombatTagManager(this.getServer(), log);
 		wbManager = new WorldBorderManager(this);
+		new MercuryManager(this);
 		load(wbManager, getWhiteListedLocationsFile());
 		loadAlts();
 		// Isnt needed since loadAlts() does this already
@@ -193,7 +195,7 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 
 				@Override
 				public void run() {
-					updateAllPearlLocations();
+					MercuryManager.updateAllPearlLocations();
 				}
 				
 			}, 300, 150);
@@ -518,6 +520,8 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 	}
 	
 	
+	public List<UUID> checkToReturnSummon = new ArrayList<UUID>(); // For when a player logs in who was just returned.
+	public List<UUID> checkToSummon = new ArrayList<UUID>(); // For when a player logs in who was just summoned.
 	// Free player if he was free'd while offline
 	// otherwise, correct his spawn location if necessary
 	@EventHandler(priority=EventPriority.HIGHEST)
@@ -525,11 +529,27 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 		final Player player = event.getPlayer();
 		updateAttachment(player);
 		checkBan(player.getUniqueId());
+		UUID uuid = player.getUniqueId();
 		
+		Location loc = pearlman.getRecentlyFreedLocation(uuid);
+		if (loc != null) {
+			player.teleport(loc);
+			return;
+		}
+		else if (checkToSummon.contains(uuid)) {
+			PrisonPearl pp = pearls.getByImprisoned(uuid);
+			player.teleport(pp.getLocation());
+			checkToSummon.remove(uuid);
+		}
+		else if (checkToReturnSummon.contains(uuid)) {
+			PrisonPearl pp = pearls.getByImprisoned(uuid);
+			summonman.returnPearl(pp);
+			checkToReturnSummon.remove(uuid);
+		}
 		if (player.isDead())
 			return;
 		
-		Location loc = player.getLocation();
+		loc = player.getLocation();
 		Location newloc = getRespawnLocation(player, loc);
 		if (newloc != null) {
 			if (loc.getWorld() == getPrisonWorld() && (newloc.getWorld() != loc.getWorld() || newloc == RESPAWN_PLAYER)) {
@@ -588,6 +608,8 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 	private Location getRespawnLocation(Player player, Location curloc) {
 		if (isMercury && isBetterShards) {
 			if (pearls.isImprisoned(player)) {
+				if (summonman.isSummoned(player))
+					return null;
 				String server = MercuryAPI.serverName();
 				String toServer = getConfig().getString("prison_server");
 				if (!server.equals(toServer)) {
@@ -599,8 +621,7 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 			} else if (curloc.getWorld() == getPrisonWorld() && !portalman.isPlayerPortaledToPrison(player)) { // not imprisoned, but spawning in prison?
 				if (BetterShardsAPI.hasBed(player.getUniqueId())) {
 					return null;
-				}
-				else if (getConfig().getBoolean("free_respawn")) { // if we should respawn instead of tp to spawn
+				} else if (getConfig().getBoolean("free_respawn")) { // if we should respawn instead of tp to spawn
 					return RESPAWN_PLAYER; // kill the player
 	            } else {
 	            	World world = getFreeWorld();
@@ -747,13 +768,16 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 					if (getConfig().getBoolean("free_tppearl")) { // if we tp to pearl on players being freed
 						loc = fuzzLocation(pp.getLocation()); // get the location of the pearl
 					}
-					if (loc == null || loc instanceof FakeLocation) // if we don't have a location yet
+					
+					if (loc == null || loc instanceof FakeLocation){ // if we don't have a location yet
 						loc = getRespawnLocation(player, currentLoc); // get the respawn location for the player
-
+						if (loc == null)
+							return;
+					}
+					
 					if (loc == RESPAWN_PLAYER) { // if we're supposed to respawn the player
 						player.setHealth(0.0); // kill him
 					} else {
-						System.out.println(loc);
 						player.teleport(loc); // otherwise teleport
 					}
 				}
@@ -816,18 +840,24 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 		
 		PrisonPearl pp = event.getPrisonPearl();
 		Player player = pp.getImprisonedPlayer();
-		if (player == null)
+		if (player == null) {
+			handleMercuryCase(event);
 			return;
+		}
 
 		switch (event.getType()) {
 		case SUMMONED:
 			player.sendMessage(ChatColor.RED+"You've been summoned to your prison pearl!");
 			if (ppconfig.getPpsummonClearInventory()) {
 				Location oldLoc = player.getLocation();
-				player.teleport(fuzzLocation(event.getLocation()));
+				Location fuzz = fuzzLocation(event.getLocation());
 				dropInventory(player, oldLoc, ppconfig.getPpsummonLeavePearls());
+				if (fuzz != null)
+					player.teleport(fuzz);
 			} else {
-				player.teleport(fuzzLocation(event.getLocation()));
+				Location fuzz = fuzzLocation(event.getLocation());
+				if (fuzz != null)
+					player.teleport(fuzz);
 			}
 			break;
 
@@ -839,13 +869,31 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 				player.sendMessage(ChatColor.RED+"You've been returned to your prison");
 				if (player.isInsideVehicle())
 					player.eject();
-				player.teleport(event.getLocation());
+				Location loc = event.getLocation();
+				if (loc == null) {
+					MercuryManager.returnPPSummon(player.getUniqueId());
+					getRespawnLocation(player, player.getLocation());
+					return;
+				}
+				player.teleport(loc);
 				break;
 			}
 
 		case KILLED:
 			player.sendMessage(ChatColor.RED+"You've been struck down by your pearl!");
+			MercuryManager.returnPPSummon(player.getUniqueId());
 			break;
+		}
+	}
+	
+	private void handleMercuryCase(SummonEvent event) {
+		UUID uuid = event.getPrisonPearl().getImprisonedId();
+		switch (event.getType()) {
+		case SUMMONED:
+			MercuryManager.requestPPSummon(uuid);
+			break;
+		case RETURNED:
+			MercuryManager.returnPPSummon(uuid);
 		}
 	}
 	
@@ -1276,17 +1324,11 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
     	return mysqlStorage;
     }
     
-    private void updateAllPearlLocations(){
-    	List<UUID> uuids = pearls.getAllUUIDSforPearls();
-    	for (UUID uuid: uuids){
-    		PrisonPearl pp = pearls.getByImprisoned(uuid);
-    		Location loc = pp.getLocation();
-    		
-    		if (loc instanceof FakeLocation)
-    			continue; // If it isn't your pearl don't worry about it.  The server that has it will send the messages.
-    		String message = uuid.toString() + " " + loc.getWorld().getName() + " " + loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockZ() + " " +
-    				pp.getUniqueIdentifier() + " " + pp.getMotd();
-    		MercuryAPI.sendGlobalMessage(message, "PrisonPearlMove");
-    	}
+    public PrisonPearlStorage getPrisonPearlStorage() {
+    	return pearls;
+    }
+    
+    public SummonManager getSummonManager() {
+    	return summonman;
     }
 }

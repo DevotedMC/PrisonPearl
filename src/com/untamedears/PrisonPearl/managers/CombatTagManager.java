@@ -51,6 +51,8 @@ public class CombatTagManager {
 	}
 	
 	public boolean isCombatTagged(Player player) {
+		if (player == null) // If a player is on another server.
+			return false;
         return (combatTagEnabled && combatTagApi != null && combatTagApi.isInCombat(player.getName())) || 
         		(combatTagPlusEnabled && combatTagPlusApi != null && combatTagPlusTagManager.isTagged(player.getUniqueId()));
     }
