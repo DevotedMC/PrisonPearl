@@ -74,12 +74,19 @@ public class PrisonPearlMysqlStorage {
 		db.execute("create table if not exists FeedDelay("
 				+ "lastRestart bigint not null default 0,"
 				+ "server varchar(255) not null);");
+		db.execute("create table if not exists ppWorldBorder("
+				+ "world varchar(36) not null,"
+				+ "x int not null,"
+				+ "y int not null,"
+				+ "z int not null,"
+				+ "primary key world_key(world));");
 	}
 
 	private PreparedStatement addPearl, removePearl, getPearl, getAllPearls, updatePearl;
 	private PreparedStatement addPortaledPlayer, removePortaledPlayer, getAllPortaledPlayers;
 	private PreparedStatement addSummonedPlayer, removeSummonedPlayer, updateSummonedPlayer, getAllSummonedPlayer;
 	private PreparedStatement updateLastRestart, getLastRestart, insertFirstRestart;
+	private PreparedStatement addWorldBorder, removeWorldBorder, getAllWorldBorder;
 	
 	public void initializeStatements() {
 		addPearl = db.prepareStatement("insert into PrisonPearls(uuid, world, x, y, z, uq, motd)"
@@ -88,7 +95,7 @@ public class PrisonPearlMysqlStorage {
 		getAllPearls = db.prepareStatement("select * from PrisonPearls;");
 		removePearl = db.prepareStatement("delete from PrisonPearls where uuid = ?");
 		updatePearl = db.prepareStatement("update PrisonPearls "
-				+ "set x = ? and y = ? and z = ? and world = ? and "
+				+ "set x = ?, y = ?, z = ?, world = ?, "
 				+ "motd = ? where uuid = ?;");
 		
 		addPortaledPlayer = db.prepareStatement("insert ignore into PrisonPearlPortaled(uuid)"
@@ -101,8 +108,8 @@ public class PrisonPearlMysqlStorage {
 				+ "values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
 		removeSummonedPlayer = db.prepareStatement("delete from PrisonPearlSummon where uuid = ?;");
 		updateSummonedPlayer = db.prepareStatement("update PrisonPearlSummon "
-				+ "set world = ? and x = ? and y = ? and z = ? and dist = ? "
-				+ "and damage = ? and canSpeak = ? and canDamage = ? and canBreak = ? "
+				+ "set world = ?, x = ?, y = ?, z = ?, dist = ?, "
+				+ "damage = ?, canSpeak = ?, canDamage = ?, canBreak = ? "
 				+ "where uuid = ?;");
 		getAllSummonedPlayer = db.prepareStatement("select * from PrisonPearlSummon;");
 		
@@ -110,6 +117,10 @@ public class PrisonPearlMysqlStorage {
 		updateLastRestart = db.prepareStatement("update FeedDelay "
 				+ "set lastRestart = ? where server = ?;");
 		getLastRestart = db.prepareStatement("select * from FeedDelay where server = ?");
+		
+		addWorldBorder = db.prepareStatement("insert into ppWorldBorder(world, x, y, z) values (?,?,?,?);");
+		removeWorldBorder = db.prepareStatement("delete from ppWorldBorder where world = ? and x = ? and y = ? and z = ?;");
+		getAllWorldBorder = db.prepareStatement("select * from ppWorldBorder;");
 	}
 
 	public void reconnectAndReinitialize() {
@@ -215,6 +226,7 @@ public class PrisonPearlMysqlStorage {
 			updatePearl.setInt(3, loc.getBlockZ());
 			updatePearl.setString(4, loc.getWorld().getName());
 			updatePearl.setString(5, pp.getMotd());
+			updatePearl.setString(6, pp.getImprisonedId().toString());
 			updatePearl.execute();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -363,5 +375,53 @@ public class PrisonPearlMysqlStorage {
 			e.printStackTrace();
 		}
 		return lastRestart;
+	}
+	
+	public void addWorldBorder(Location loc) {
+		try {
+			addWorldBorder.setString(1, loc.getWorld().getUID().toString());
+			addWorldBorder.setInt(2, loc.getBlockX());
+			addWorldBorder.setInt(3, loc.getBlockY());
+			addWorldBorder.setInt(4, loc.getBlockZ());
+			addWorldBorder.execute();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void removeWorldBorder(Location loc) {
+		try {
+			removeWorldBorder.setString(1, loc.getWorld().getUID().toString());
+			removeWorldBorder.setInt(2, loc.getBlockX());
+			removeWorldBorder.setInt(3, loc.getBlockY());
+			removeWorldBorder.setInt(4, loc.getBlockZ());
+			removeWorldBorder.execute();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public List<Location> getAllWorldBorder() {
+		List<Location> locs = new ArrayList<Location>();
+		try {
+			ResultSet set = getAllWorldBorder.executeQuery();
+			while (set.next()) {
+				UUID uuid = UUID.fromString(set.getString("world"));
+				World world = Bukkit.getWorld(uuid);
+				if (world == null)
+					continue;
+				int x = set.getInt("x");
+				int y = set.getInt("y");
+				int z = set.getInt("z");
+				Location loc = new Location(world, x, y, z);
+				locs.add(loc);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return locs;
 	}
 }

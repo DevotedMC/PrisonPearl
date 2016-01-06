@@ -52,6 +52,9 @@ public class WorldBorderManager implements SaveLoad{
     
 	@Override
 	public void save(File file) throws IOException {
+		if (plugin.getMysqlStorage() != null) {
+			return;
+		}
 		FileOutputStream  fos = new FileOutputStream (file);
 		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
 		bw.append("whitelistedlocations File");
@@ -66,6 +69,10 @@ public class WorldBorderManager implements SaveLoad{
 	}
 	@Override
 	public void load(File file) throws IOException {
+		if (plugin.getMysqlStorage() != null) {
+			mysqlLoad();
+			return;
+		}
 		FileInputStream fis = new FileInputStream(file);
 		BufferedReader br = new BufferedReader(new InputStreamReader(fis));
 		plugin.getLogger().log(Level.INFO, file.getName());
@@ -104,6 +111,7 @@ public class WorldBorderManager implements SaveLoad{
     		return false;
     	} else {
     		WhiteListedLocations.add(loc);
+    		plugin.getMysqlStorage().addWorldBorder(loc);
     		plugin.getLogger().log(Level.INFO, ("A new location was added to the whitelist " + loc));
     		dirty = true;
     		return true;
@@ -112,6 +120,7 @@ public class WorldBorderManager implements SaveLoad{
     public boolean removeWhitelistedLocation(Location loc) {
     	if(WhiteListedLocations.contains(loc)) {
     		WhiteListedLocations.remove(loc);
+    		plugin.getMysqlStorage().removeWorldBorder(loc);
     		plugin.getLogger().log(Level.INFO, ("A location was removed from the whitelist " + loc));
     		dirty=true;
     		return true;
@@ -144,6 +153,12 @@ public class WorldBorderManager implements SaveLoad{
     		return false;
     	}
 
+    }
+    
+    private void mysqlLoad() {
+    	List<Location> locs = plugin.getMysqlStorage().getAllWorldBorder();
+    	for (Location loc: locs)
+    		addWhitelistedLocation(loc);
     }
 	
 }
