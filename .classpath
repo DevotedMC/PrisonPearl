@@ -6,24 +6,15 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6">
-		<attributes>
-			<attribute name="maven.pomderived" value="true"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
 		<attributes>
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="D:/MC Development/Civcraft Mods/aaa Built Jars/[1.7.10_1.8]Namelayer.jar"/>
-	<classpathentry kind="lib" path="D:/MC Development/Civcraft Mods/aaa Built Jars/Combat-Tag-6.0.3c2-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="D:/MC Development/Server Jars/craftbukkit-1.7.10-R0.1-20140817.180155-16.jar"/>
-	<classpathentry kind="lib" path="D:/MC Development/Server Jars/craftbukkit-1.7.10-R0.1-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="D:/MC Development/Server Jars/craftbukkit-1.8.jar"/>
-	<classpathentry kind="lib" path="D:/MC Development/Server Jars/minecraft_server.1.7.10.jar"/>
-	<classpathentry kind="lib" path="D:/MC Development/Server Jars/minecraft_server.1.8.1.jar"/>
-	<classpathentry kind="lib" path="D:/MC Development/Server Jars/spigot_1.7.10.jar"/>
-	<classpathentry kind="lib" path="D:/MC Development/Server Jars/spigot-1.8.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

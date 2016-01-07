@@ -1,7 +1,7 @@
 name: ${project.name}
 main: com.untamedears.PrisonPearl.PrisonPearlPlugin
 version: ${project.version}
-softdepend: [Mercury, NameLayer, CombatTag, WorldBorder, CombatTagPlus, BetterShards]
+softdepend: [Mercury, NameLayer, CombatTag, WorldBorder, CombatTagPlus, BetterShards, CBanManagement]
 description: PrisonPearl makes it so players can imprison each other (called 'pearling') in The End. Kill someone with an ender pearl in your hotbar and they'll be stuck in The End and tied to the pearl. Destroying the pearl releases them.
 commands:
    pplocate:

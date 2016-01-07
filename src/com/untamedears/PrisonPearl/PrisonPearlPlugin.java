@@ -52,8 +52,10 @@ import com.untamedears.PrisonPearl.events.PrisonPearlEvent;
 import com.untamedears.PrisonPearl.events.SummonEvent;
 import com.untamedears.PrisonPearl.managers.BanManager;
 import com.untamedears.PrisonPearl.managers.BroadcastManager;
+import com.untamedears.PrisonPearl.managers.CBanManager;
 import com.untamedears.PrisonPearl.managers.CombatTagManager;
 import com.untamedears.PrisonPearl.managers.DamageLogManager;
+import com.untamedears.PrisonPearl.managers.FBanManager;
 import com.untamedears.PrisonPearl.managers.MercuryManager;
 import com.untamedears.PrisonPearl.managers.PrisonPearlManager;
 import com.untamedears.PrisonPearl.managers.PrisonPortaledPlayerManager;
@@ -61,7 +63,6 @@ import com.untamedears.PrisonPearl.managers.SummonManager;
 import com.untamedears.PrisonPearl.managers.WorldBorderManager;
 
 import vg.civcraft.mc.bettershards.BetterShardsAPI;
-import vg.civcraft.mc.bettershards.BetterShardsPlugin;
 import vg.civcraft.mc.bettershards.events.PlayerChangeServerReason;
 import vg.civcraft.mc.mercury.MercuryAPI;
 import vg.civcraft.mc.namelayer.NameAPI;
@@ -116,9 +117,22 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 		
 		log = this.getLogger();
 		
-		banManager_ = new BanManager(this);
+		// Check for CBan.
+		if (this.getServer().getPluginManager().isPluginEnabled("CBanManagement")) {
+			banManager_ = new CBanManager(this);
+			if (!banManager_.initialize()) {
+				PrisonPearlPlugin.log("CBanManagement failed to initialize, falling back on file Ban Manager");
+				banManager_ = null;
+			}
+		}
+		if (banManager_ == null) {
+			banManager_ = new FBanManager(this);
+			if (!banManager_.initialize()) {
+				PrisonPearlPlugin.log("Failed to initialize a Ban Manager!");
+			}
+		}
+		
 		banManager_.setBanMessage(kickMessage);
-		banManager_.initialize();
 		
 		//lastLoggout = new HashMap<String, Long>();
 		//wasKicked = new HashMap<String, Boolean>();
@@ -213,6 +227,7 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 		globalInstance = null;
 	}
 	
+	@SuppressWarnings("deprecation")
 	public void updateToUUID() throws IOException{
 		File file = new File(getDataFolder(), "alts.txt");
 		File newFile = null;
