@@ -146,7 +146,7 @@ public class MercuryListener implements Listener{
 			sm.summonPearl(thePearl);
 			try {
 				BetterShardsAPI.connectPlayer(p, toServer, PlayerChangeServerReason.PLUGIN);
-			} catch (PlayerStillDeadException psde) {
+			} catch (Exception psde) {
 				plugin.getLogger().log(Level.WARNING, "Unable to summon player {0}, they are dead.", p.getName());
 				String returnMessage = String.format("%s cannot be summoned.", p.getName());
 				MercuryManager.denyPPSummon(uuid, returnMessage);

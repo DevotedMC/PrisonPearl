@@ -243,7 +243,7 @@ public class PrisonPearlManager implements Listener {
 		if (server != null) {
 			try {
 				BetterShardsAPI.connectPlayer(pp.getImprisonedPlayer(), server, PlayerChangeServerReason.PLUGIN);
-			} catch (PlayerStillDeadException e) {
+			} catch (Exception e) {
 				plugin.getLogger().log(Level.WARNING, "A request to free {0} was received but they are still dead.",
 						pp.getImprisonedName());
 				return false;

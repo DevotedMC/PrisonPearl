@@ -632,7 +632,7 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 				if (!server.equals(toServer)) {
 					try {
 						BetterShardsAPI.connectPlayer(player, toServer, PlayerChangeServerReason.PLUGIN);
-					} catch (PlayerStillDeadException e) {
+					} catch (Exception e) {
 						PrisonPearlPlugin.globalInstance.getLogger().log(Level.WARNING, "A request to get respawn for {0} was received but they are still dead.",
 								player.getName());
 					}
@@ -651,7 +651,7 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 	            	if (world == null) {
 	            		try {
 							BetterShardsAPI.connectPlayer(player, toServer, PlayerChangeServerReason.PLUGIN);
-						} catch (PlayerStillDeadException e) {
+						} catch (Exception e) {
 							PrisonPearlPlugin.globalInstance.getLogger().log(Level.WARNING, "A request to get respawn/free for {0} was received but they are still dead.",
 									player.getName());
 						}
