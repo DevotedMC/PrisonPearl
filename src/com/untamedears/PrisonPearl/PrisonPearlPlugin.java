@@ -64,6 +64,7 @@ import com.untamedears.PrisonPearl.managers.WorldBorderManager;
 
 import vg.civcraft.mc.bettershards.BetterShardsAPI;
 import vg.civcraft.mc.bettershards.events.PlayerChangeServerReason;
+import vg.civcraft.mc.bettershards.misc.PlayerStillDeadException;
 import vg.civcraft.mc.mercury.MercuryAPI;
 import vg.civcraft.mc.namelayer.NameAPI;
 
@@ -629,7 +630,12 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 				String server = MercuryAPI.serverName();
 				String toServer = getConfig().getString("prison_server");
 				if (!server.equals(toServer)) {
-					BetterShardsAPI.connectPlayer(player, toServer, PlayerChangeServerReason.PLUGIN);
+					try {
+						BetterShardsAPI.connectPlayer(player, toServer, PlayerChangeServerReason.PLUGIN);
+					} catch (PlayerStillDeadException e) {
+						PrisonPearlPlugin.globalInstance.getLogger().log(Level.WARNING, "A request to get respawn for {0} was received but they are still dead.",
+								player.getName());
+					}
 					return null;
 				} else if (curloc.getWorld() != getPrisonWorld()){
 					return getPrisonSpawnLocation(); // should bre respawned in prison
@@ -643,7 +649,12 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 	            	World world = getFreeWorld();
 	            	String toServer = getConfig().getString("free_server");
 	            	if (world == null) {
-	            		BetterShardsAPI.connectPlayer(player, toServer, PlayerChangeServerReason.PLUGIN);
+	            		try {
+							BetterShardsAPI.connectPlayer(player, toServer, PlayerChangeServerReason.PLUGIN);
+						} catch (PlayerStillDeadException e) {
+							PrisonPearlPlugin.globalInstance.getLogger().log(Level.WARNING, "A request to get respawn/free for {0} was received but they are still dead.",
+									player.getName());
+						}
 	            		return null;
 	            	}
 					return world.getSpawnLocation(); // otherwise, respawn him at the spawn of the free world
@@ -680,17 +691,7 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 		UUID uuid = player.getUniqueId();
 		String playerName = player.getName();
 		
-		if (combatTagManager.isCombatTagNPC(event.getEntity()))  {
-			playerName = player.getName();
-			// UUID being passed isn't the right one.
-			uuid = NameAPI.getUUID(playerName);
-			//String realName = combatTagManager.getNPCPlayerName(player);
-			log.info("NPC Player: "+playerName+", ID: "+ uuid);
-//			if (!realName.equals("")) {
-//				playerName = realName;
-//			}
-		}
-		else if (combatTagManager.isCombatTagPlusNPC(player)){
+		if (combatTagManager.isCombatTagPlusNPC(player)){
 			NpcIdentity iden = combatTagManager.getCombatTagPlusNPCIdentity(player);
 			uuid = iden.getId();
 			playerName = iden.getName();

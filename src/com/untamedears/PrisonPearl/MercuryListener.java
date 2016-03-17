@@ -1,11 +1,10 @@
 package com.untamedears.PrisonPearl;
 
 import java.util.UUID;
+import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -17,6 +16,7 @@ import com.untamedears.PrisonPearl.managers.SummonManager;
 
 import vg.civcraft.mc.bettershards.BetterShardsAPI;
 import vg.civcraft.mc.bettershards.events.PlayerChangeServerReason;
+import vg.civcraft.mc.bettershards.misc.PlayerStillDeadException;
 import vg.civcraft.mc.mercury.MercuryAPI;
 import vg.civcraft.mc.mercury.events.AsyncPluginBroadcastMessageEvent;
 
@@ -142,8 +142,16 @@ public class MercuryListener implements Listener{
 				return;
 			}
 			// Job of the shard holding the player in the prison world to add to mysql.
-			sm.summonPearl(pearls.getByImprisoned(p));
-			BetterShardsAPI.connectPlayer(p, toServer, PlayerChangeServerReason.PLUGIN);
+			PrisonPearl thePearl = pearls.getByImprisoned(p);
+			sm.summonPearl(thePearl);
+			try {
+				BetterShardsAPI.connectPlayer(p, toServer, PlayerChangeServerReason.PLUGIN);
+			} catch (PlayerStillDeadException psde) {
+				plugin.getLogger().log(Level.WARNING, "Unable to summon player {0}, they are dead.", p.getName());
+				String returnMessage = String.format("%s cannot be summoned.", p.getName());
+				MercuryManager.denyPPSummon(uuid, returnMessage);
+				sm.returnPearl(thePearl);
+			}
 		}
 		else if (reason.equals("deny")) {
 			PrisonPearl pp = pearls.getByImprisoned(uuid);

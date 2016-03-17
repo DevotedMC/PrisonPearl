@@ -13,6 +13,7 @@ import org.bukkit.Difficulty;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.TreeType;
 import org.bukkit.World;
@@ -21,7 +22,6 @@ import org.bukkit.WorldType;
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Arrow;
-import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.FallingBlock;
@@ -698,18 +698,6 @@ public class FakeLocation extends Location{
 		}
 
 		@Override
-		public LivingEntity spawnCreature(Location arg0, EntityType arg1) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
-		public LivingEntity spawnCreature(Location arg0, CreatureType arg1) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
 		public Entity spawnEntity(Location arg0, EntityType arg1) {
 			// TODO Auto-generated method stub
 			return null;
@@ -795,6 +783,97 @@ public class FakeLocation extends Location{
 				double arg2, double arg3) {
 			// TODO Auto-generated method stub
 			return null;
+		}
+
+		@Override
+		public void playSound(Location arg0, String arg1, float arg2, float arg3) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public <T extends Arrow> T spawnArrow(Location arg0, Vector arg1, float arg2, float arg3, Class<T> arg4) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public void spawnParticle(Particle arg0, Location arg1, int arg2) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public <T> void spawnParticle(Particle arg0, Location arg1, int arg2, T arg3) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void spawnParticle(Particle arg0, double arg1, double arg2, double arg3, int arg4) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public <T> void spawnParticle(Particle arg0, double arg1, double arg2, double arg3, int arg4, T arg5) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void spawnParticle(Particle arg0, Location arg1, int arg2, double arg3, double arg4, double arg5) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public <T> void spawnParticle(Particle arg0, Location arg1, int arg2, double arg3, double arg4, double arg5,
+				T arg6) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void spawnParticle(Particle arg0, Location arg1, int arg2, double arg3, double arg4, double arg5,
+				double arg6) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void spawnParticle(Particle arg0, double arg1, double arg2, double arg3, int arg4, double arg5,
+				double arg6, double arg7) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public <T> void spawnParticle(Particle arg0, Location arg1, int arg2, double arg3, double arg4, double arg5,
+				double arg6, T arg7) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public <T> void spawnParticle(Particle arg0, double arg1, double arg2, double arg3, int arg4, double arg5,
+				double arg6, double arg7, T arg8) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void spawnParticle(Particle arg0, double arg1, double arg2, double arg3, int arg4, double arg5,
+				double arg6, double arg7, double arg8) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public <T> void spawnParticle(Particle arg0, double arg1, double arg2, double arg3, int arg4, double arg5,
+				double arg6, double arg7, double arg8, T arg9) {
+			// TODO Auto-generated method stub
+			
 		}
 	}
 }
