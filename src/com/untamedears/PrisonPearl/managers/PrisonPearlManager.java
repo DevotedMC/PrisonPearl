@@ -58,9 +58,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitTask;
 
 import vg.civcraft.mc.bettershards.BetterShardsAPI;
-import vg.civcraft.mc.bettershards.events.PlayerChangeServerEvent;
 import vg.civcraft.mc.bettershards.events.PlayerChangeServerReason;
-import vg.civcraft.mc.bettershards.misc.PlayerStillDeadException;
 import vg.civcraft.mc.mercury.MercuryAPI;
 import vg.civcraft.mc.namelayer.NameAPI;
 
@@ -78,6 +76,7 @@ public class PrisonPearlManager implements Listener {
 	private EnderExpansion ee;
 	private boolean isNameLayer;
 	private boolean isMercury;
+	private boolean isBetterShards;
 	
 	private Map<UUID, Location> recentlyFreed = new HashMap<UUID, Location>(); 
 
@@ -87,7 +86,11 @@ public class PrisonPearlManager implements Listener {
 		this.ee = ee;
 		isNameLayer = Bukkit.getPluginManager().isPluginEnabled("NameLayer");
 		isMercury = plugin.isMercuryLoaded();
+		isBetterShards = plugin.isBetterShardsEnabled();
 		Bukkit.getPluginManager().registerEvents(this, plugin);
+		if (isBetterShards) {
+			Bukkit.getPluginManager().registerEvents(new BetterShardsPrisonPearlManager(plugin, pearls, ee), plugin);
+		}
 	}
 
 	public boolean imprisonPlayer(Player imprisoned, Player imprisoner) {
@@ -239,6 +242,7 @@ public class PrisonPearlManager implements Listener {
 	}
 	
 	public boolean freePearlFromMercury(PrisonPearl pp, String reason, String server) {
+		if (!(isMercury && isBetterShards)) return false;
 		pearls.deletePearlMercuryCase(pp);
 		if (server != null) {
 			try {
@@ -348,21 +352,6 @@ public class PrisonPearlManager implements Listener {
 			world.dropItemNaturally(loc, item);  // drops pearl to ground.
 		}
 		player.saveData();
-	}
-	
-	@EventHandler(priority = EventPriority.MONITOR)
-	public void playerChangeServerEvent(PlayerChangeServerEvent event) {
-		Inventory inv = Bukkit.getPlayer(event.getPlayerUUID()).getInventory();
-		for (Entry<Integer, ? extends ItemStack> entry :
-				inv.all(Material.ENDER_PEARL).entrySet()) {
-			ItemStack item = entry.getValue();
-			PrisonPearl pp = pearls.getByItemStack(item);
-			if (pp == null) {
-				continue;
-			}
-			MercuryManager.updateTransferToMercury(event.getPlayerUUID(), pp.getImprisonedId());
-		}
-		PrisonPearlStorage.playerIsTransfering(event.getPlayerUUID());
 	}
 
 	// Drops a pearl when a player leaves.
