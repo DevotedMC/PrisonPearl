@@ -39,6 +39,9 @@ public class WorldBorderManager implements SaveLoad{
     	}
     	World world = loc.getWorld();
     	BorderData border = Config.Border(world.getName());
+		if (border == null) {
+			return false;
+		}
     	return !border.insideBorder(loc);
     }
     
