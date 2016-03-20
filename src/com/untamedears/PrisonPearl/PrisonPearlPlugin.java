@@ -857,7 +857,7 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 		
 		PrisonPearl pp = event.getPrisonPearl();
 		Player player = pp.getImprisonedPlayer();
-		if (player == null) {
+		if (player == null && isMercury) {
 			handleMercuryCase(event);
 			return;
 		}
@@ -888,7 +888,9 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 					player.eject();
 				Location loc = event.getLocation();
 				if (loc == null) {
-					MercuryManager.returnPPSummon(player.getUniqueId());
+					if (isMercury) {
+						MercuryManager.returnPPSummon(player.getUniqueId());
+					}
 					getRespawnLocation(player, player.getLocation());
 					return;
 				}
@@ -898,7 +900,9 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 
 		case KILLED:
 			player.sendMessage(ChatColor.RED+"You've been struck down by your pearl!");
-			MercuryManager.returnPPSummon(player.getUniqueId());
+			if (isMercury) {
+				MercuryManager.returnPPSummon(player.getUniqueId());
+			}
 			break;
 		}
 	}

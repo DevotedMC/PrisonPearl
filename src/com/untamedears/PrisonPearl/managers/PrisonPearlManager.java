@@ -182,7 +182,9 @@ public class PrisonPearlManager implements Listener {
 					" uuid: " + pp.getImprisonedId());
 			return false;
 		}
-		MercuryManager.updateLocationToMercury(pp, PrisonPearlEvent.Type.NEW);
+		if (isMercury) {
+			MercuryManager.updateLocationToMercury(pp, PrisonPearlEvent.Type.NEW);
+		}
 		pp.markMove();
 
 		// Create the inventory item
@@ -237,7 +239,9 @@ public class PrisonPearlManager implements Listener {
 		plugin.checkBan(pp.getImprisonedId());
 		plugin.checkBanForAlts(pp.getImprisonedId());
 		recentlyFreed.put(pp.getImprisonedId(), pp.getLocation());
-		MercuryManager.updateLocationToMercury(pp, PrisonPearlEvent.Type.FREED);
+		if (isMercury) {
+			MercuryManager.updateLocationToMercury(pp, PrisonPearlEvent.Type.FREED);
+		}
 		return true;
 	}
 	
@@ -763,7 +767,9 @@ public class PrisonPearlManager implements Listener {
 		pearls.markDirty();
 		Bukkit.getPluginManager().callEvent(
 				new PrisonPearlEvent(pp, PrisonPearlEvent.Type.DROPPED));
-		MercuryManager.updateLocationToMercury(pp, PrisonPearlEvent.Type.DROPPED);
+		if (isMercury) {
+			MercuryManager.updateLocationToMercury(pp, PrisonPearlEvent.Type.DROPPED);
+		}
 	}
 
 	private void updatePearl(PrisonPearl pp, Player player) {
@@ -779,7 +785,9 @@ public class PrisonPearlManager implements Listener {
 		pearls.markDirty();
 		Bukkit.getPluginManager().callEvent(
 				new PrisonPearlEvent(pp, PrisonPearlEvent.Type.HELD));
-		MercuryManager.updateLocationToMercury(pp, PrisonPearlEvent.Type.HELD);
+		if (isMercury) {
+			MercuryManager.updateLocationToMercury(pp, PrisonPearlEvent.Type.HELD);
+		}
 	}
 
 	private <ItemBlock extends InventoryHolder & BlockState> void updatePearl(
@@ -788,7 +796,9 @@ public class PrisonPearlManager implements Listener {
 		pearls.markDirty();
 		Bukkit.getPluginManager().callEvent(
 				new PrisonPearlEvent(pp, PrisonPearlEvent.Type.HELD));
-		MercuryManager.updateLocationToMercury(pp, PrisonPearlEvent.Type.HELD);
+		if (isMercury) {
+			MercuryManager.updateLocationToMercury(pp, PrisonPearlEvent.Type.HELD);
+		}
 	}
 
 	private boolean prisonPearlEvent(PrisonPearl pp, PrisonPearlEvent.Type type) {
