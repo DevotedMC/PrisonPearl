@@ -788,8 +788,10 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 					
 					if (loc == null || loc instanceof FakeLocation){ // if we don't have a location yet
 						loc = getRespawnLocation(player, currentLoc); // get the respawn location for the player
-						if (loc == null)
+						if (loc == null) {
+							log.log(Level.INFO, "Failed to find a respawn location for the online player {0}", player.getName());
 							return;
+						}
 					}
 					
 					if (loc == RESPAWN_PLAYER) { // if we're supposed to respawn the player
@@ -801,6 +803,8 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 				if (ppconfig.getPpsummonClearInventory()) {
 					dropInventory(player, currentLoc, ppconfig.getPpsummonLeavePearls());
 				}
+				// Be sure to remove the freed location if player is actually online.
+				pearlman.getRecentlyFreedLocation(player.getUniqueId());
 			}
 			UUID[] alts = altsList.getAltsArray(playerId);
 			checkBans(alts);
