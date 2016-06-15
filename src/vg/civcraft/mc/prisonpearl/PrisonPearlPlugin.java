@@ -85,11 +85,14 @@ public class PrisonPearlPlugin extends ACivMod {
 		new AltsListListener();
 		new BanListener();
 		new DamageListener();
-		new MercuryListener();
+		if (isMercuryEnabled())
+			new MercuryListener();
 		new PlayerListener();
 		new PrisonPortaledPlayerListener();
-		new CombatTagListener();
-		new BetterShardsListener();
+		if (isCombatTagPlusEnabled())
+			new CombatTagListener();
+		if (isBetterShardsEnabled())
+			new BetterShardsListener();
 		new SummonListener();
 	}
 	
@@ -172,5 +175,9 @@ public class PrisonPearlPlugin extends ACivMod {
 	
 	public static boolean isWorldBorderEnabled() {
 		return Bukkit.getPluginManager().isPluginEnabled("WorldBorder");
+	}
+
+	public static boolean isCombatTagPlusEnabled() {
+		return Bukkit.getPluginManager().isPluginEnabled("CombatTagPlus");
 	}
 }
