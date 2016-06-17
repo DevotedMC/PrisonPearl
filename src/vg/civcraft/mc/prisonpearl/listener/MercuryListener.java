@@ -143,8 +143,13 @@ public class MercuryListener implements Listener{
 		FakeLocation loc = new FakeLocation(world, Double.parseDouble(message[3]), Double.parseDouble(message[4]),
 				Double.parseDouble(message[5]), server, player);
 		PrisonPearl pp = pearls.getByImprisoned(uuid);
-		pp.setHolder(loc);
-		pp.markMove();
+		if (pp != null) {
+			pp.setHolder(loc);
+			pp.markMove();
+		}
+		else {
+			PrisonPearlPlugin.getInstance().warning("Tried to update location of nonexistent pearl " + uuid + " " + world + " " + player);
+		}
 	}
 	
 	private void prisonPearlSummon(String[] message, String server) {
