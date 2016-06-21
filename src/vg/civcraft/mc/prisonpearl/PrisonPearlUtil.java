@@ -60,7 +60,11 @@ public class PrisonPearlUtil {
 			return true;
 		}
 		else if (pp != null && freeToPearl) {
-			p.teleport(pp.getLocation());
+			if (pp.getLocation().getY() < 1.0) {
+				p.teleport(pp.getLocation().add(0,1.0,0));
+			} else {
+				p.teleport(pp.getLocation());
+			}
 			return true;
 		}
 		return false;

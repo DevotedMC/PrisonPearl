@@ -6,3 +6,5 @@ craftbukkit.jar
 /craftbukkit-1.4.5-R0.3-SNAPSHOT.jar
 /CombatTag.jar
 /target
+.classpath
+.settings/*
