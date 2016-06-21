@@ -755,7 +755,7 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 			String imprisonerLoc = serializeLocation(imprisoner.getLocation());
 			String playerLoc = null;
 			if (p.isOnline())
-				serializeLocation(p.getPlayer().getLocation());
+				playerLoc = serializeLocation(p.getPlayer().getLocation());
 			String message = String.format("%s [%s] has bound %s [%s] to a PrisonPearl", 
 											imprisoner.getDisplayName(), imprisonerLoc,
 											playerName, playerLoc);
@@ -1018,7 +1018,7 @@ public class PrisonPearlPlugin extends JavaPlugin implements Listener {
 		Location newloc = loc.clone();
 		if (newloc == null)
 			return null;
-		newloc.add(1.2*Math.cos(rad), 1.2*Math.sin(rad), 0);
+		newloc.add(1.2*Math.cos(rad), 0.25, 1.2*Math.sin(rad));
 		return newloc;
 	}
 	

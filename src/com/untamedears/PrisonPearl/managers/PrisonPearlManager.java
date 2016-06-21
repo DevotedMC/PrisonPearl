@@ -238,7 +238,11 @@ public class PrisonPearlManager implements Listener {
 		// unban alts and players if they are allowed to be
 		plugin.checkBan(pp.getImprisonedId());
 		plugin.checkBanForAlts(pp.getImprisonedId());
-		recentlyFreed.put(pp.getImprisonedId(), pp.getLocation());
+		if (pp.getLocation().getY() < 1.0) {
+			recentlyFreed.put(pp.getImprisonedId(), pp.getLocation().add(0, 1.0, 0));
+		} else {
+			recentlyFreed.put(pp.getImprisonedId(), pp.getLocation());
+		}
 		if (isMercury) {
 			MercuryManager.updateLocationToMercury(pp, PrisonPearlEvent.Type.FREED);
 		}
