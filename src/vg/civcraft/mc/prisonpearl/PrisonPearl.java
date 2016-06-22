@@ -73,7 +73,6 @@ public class PrisonPearl {
 	private boolean pearlOnCursor = false;
 	private long lastMoved = 0;
 	private final int unique;
-	private PrisonPearlManager manager = PrisonPearlPlugin.getPrisonPearlManager();
 
 	public PrisonPearl(String imprisonedName, UUID imprisonedId,
 			Player holderplayer, int unique, UUID killer, long imprisonTime) {
@@ -303,7 +302,7 @@ public class PrisonPearl {
 					return HolderVerReason.IN_HAND;
 				}
 				ItemStack cursoritem = holder.player.getItemOnCursor();
-				if (cursoritem.getType() == Material.ENDER_PEARL && manager.isItemStackPrisonPearl(this, cursoritem))
+				if (cursoritem.getType() == Material.ENDER_PEARL && isItemStackPrisonPearl(cursoritem))
 					return HolderVerReason.IN_HAND;
 				inv = holder.player.getInventory();
 				feedback.append(String.format("Not in %s's inventory", holder.player.getName()));
@@ -323,7 +322,7 @@ public class PrisonPearl {
 				inv = ((InventoryHolder)bs).getInventory();
 				for (HumanEntity viewer : inv.getViewers()) {
 					ItemStack cursoritem = viewer.getItemOnCursor();
-					if (cursoritem.getType() == Material.ENDER_PEARL && manager.isItemStackPrisonPearl(this, cursoritem))
+					if (cursoritem.getType() == Material.ENDER_PEARL && isItemStackPrisonPearl(cursoritem))
 						feedback.append(String.format("In hand of %s viewing chest at (%d,%d,%d)",
 								viewer.getName(),
 								holder.blocklocation.getBlockX(),
@@ -343,7 +342,7 @@ public class PrisonPearl {
 				return HolderVerReason.NO_ITEM_PLAYER_OR_LOCATION;
 			}
 			for (ItemStack item : inv.all(Material.ENDER_PEARL).values()) {
-				if (manager.isItemStackPrisonPearl(this, item)) {
+				if (isItemStackPrisonPearl(item)) {
 					if (holder.blocklocation != null)
 						feedback.append(String.format("In inventory at (%d,%d,%d)",
 							holder.blocklocation.getBlockX(),
@@ -510,4 +509,8 @@ public class PrisonPearl {
     public long getImprisonTime() {
     	return imprisonTime;
     }
+
+	private boolean isItemStackPrisonPearl(ItemStack item) {
+		return PrisonPearlPlugin.getPrisonPearlManager().isItemStackPrisonPearl(this, item);
+	}
 }
