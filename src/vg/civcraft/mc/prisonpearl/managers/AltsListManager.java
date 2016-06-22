@@ -66,9 +66,9 @@ public class AltsListManager implements Listener {
 		if (!PrisonPearlConfig.getShouldEnableAltsManager())
 			return new UUID[0];
 		if (!altsHash.containsKey(uuid)){
-			List<UUID> uuids = new ArrayList<UUID>();
-			uuids.add(uuid);
-			queryForUpdatedAltLists(uuids);
+			return new UUID[0];
+			// We don't need to query for alts here, on any update we should recieve
+			// a new event as well as be given the events ahead of time so should have the alts.
 		}
 		List<UUID> uuids = altsHash.get(uuid);
 		if (uuids == null || uuids.size() == 0){

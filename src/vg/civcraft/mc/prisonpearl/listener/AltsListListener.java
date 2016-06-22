@@ -11,6 +11,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
+import vg.civcraft.mc.prisonpearl.PrisonPearlConfig;
 import vg.civcraft.mc.prisonpearl.PrisonPearlPlugin;
 import vg.civcraft.mc.prisonpearl.events.AltsListEvent;
 import vg.civcraft.mc.prisonpearl.managers.AltsListManager;
@@ -29,6 +30,8 @@ public class AltsListListener implements Listener {
 
 	@EventHandler(priority = EventPriority.NORMAL)
 	public void onAltsListUpdate(final AltsListEvent event) {
+		if (!PrisonPearlConfig.getShouldEnableAltsManager())
+			return;
 		Bukkit.getScheduler().runTaskAsynchronously(PrisonPearlPlugin.getInstance(), new Runnable() {
 
 			@Override
