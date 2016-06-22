@@ -26,6 +26,8 @@ public class BanListener implements Listener{
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPlayerLogin(AsyncPlayerPreLoginEvent event) {
+		if (!PrisonPearlConfig.getShouldEnableAltsManager())
+			return;
 		StringBuilder sb = new StringBuilder();
 		final UUID uuidName = event.getUniqueId();
 		sb.append("Alt-Ban-Info: ");

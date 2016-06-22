@@ -230,16 +230,19 @@ public class PrisonPearlManager {
 			return false;
 		}
 		storage.removePearl(pp, reason); // delete the pearl first
-		// unban alts and players if they are allowed to be
-		Bukkit.getScheduler().runTaskAsynchronously(PrisonPearlPlugin.getInstance(), new Runnable() {
 
-			@Override
-			public void run() {
-				banManager.checkBan(pp.getImprisonedId());
-				banManager.checkBanForAlts(pp.getImprisonedId());
-			}
-			
-		});
+		if (PrisonPearlConfig.getShouldEnableAltsManager()) {
+			// unban alts and players if they are allowed to be; bukkit requires kicks be synchronous
+			Bukkit.getScheduler().runTask(PrisonPearlPlugin.getInstance(), new Runnable() {
+
+				@Override
+				public void run() {
+					banManager.checkBan(pp.getImprisonedId());
+					banManager.checkBanForAlts(pp.getImprisonedId());
+				}
+				
+			});
+		}
 		MercuryManager.updateLocationToMercury(pp, PrisonPearlEvent.Type.FREED);
 		
 		PrisonPearlPlugin.getSummonManager().removeSummon(pp);
