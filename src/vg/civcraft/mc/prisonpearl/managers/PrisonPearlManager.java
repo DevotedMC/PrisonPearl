@@ -31,6 +31,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.permissions.PermissionAttachment;
 
@@ -77,8 +78,10 @@ public class PrisonPearlManager {
 		banManager = PrisonPearlPlugin.getBanManager();
 		
 		// PreCache needed alts.
-		for (PrisonPearl pp : storage.getAllPearls()) {
-			altsManager.cacheAltListFor(pp.getImprisonedId());
+		if (!PrisonPearlConfig.getShouldEnableAltsManager()) {
+			for (PrisonPearl pp : storage.getAllPearls()) {
+				altsManager.cacheAltListFor(pp.getImprisonedId());
+			}
 		}
 	}
 	
@@ -261,11 +264,28 @@ public class PrisonPearlManager {
 		String playerLoc = player != null ? serializeLocation(player.getLocation()) : "[???]";
 		String message = String.format("Something weird has happened with the pearl " + pp.getImprisonedName() + ", were they maybe freed by pearl feeding?");
 		
-		if (imprisoner != null) {
+		if (imprisoner != null && player != null) {
 			String imprisonerLoc = serializeLocation(imprisoner.getLocation());
 			message = String.format("%s [%s] was freed by %s [%s]", 
-					imprisoner.getName(), playerLoc, imprisoner.getDisplayName(), imprisonerLoc);
+					player.getDisplayName(), playerLoc, imprisoner.getDisplayName(), imprisonerLoc);
 		} 
+		
+		if (imprisoner != null) { 
+			// immediately update pearl in inventory
+			PlayerInventory pi = imprisoner.getInventory();
+			Integer location = null;
+			for(Entry<Integer, ? extends ItemStack> i : pi.all(Material.ENDER_PEARL).entrySet()) {
+				if (this.isItemStackPrisonPearl(pp, i.getValue())) {
+					location = i.getKey();
+					break;
+				}
+			}
+			if (location != null) {
+				pi.clear(location);
+				pi.addItem(new ItemStack(Material.ENDER_PEARL, 1));
+				imprisoner.updateInventory();
+			}
+		}
 		
 		PrisonPearlPlugin.log(message);
 		

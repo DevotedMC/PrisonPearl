@@ -1,9 +1,6 @@
 package vg.civcraft.mc.prisonpearl.listener;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -23,7 +20,10 @@ public class AltsListListener implements Listener {
 	private AltsListManager altsManager;
 
 	public AltsListListener() {
-		Bukkit.getPluginManager().registerEvents(this, PrisonPearlPlugin.getInstance());
+		// Don't bother registering, if not enabled.
+		if (!PrisonPearlConfig.getShouldEnableAltsManager()) {
+			Bukkit.getPluginManager().registerEvents(this, PrisonPearlPlugin.getInstance());
+		}
 		ban = PrisonPearlPlugin.getBanManager();
 		altsManager = PrisonPearlPlugin.getAltsListManager();
 	}

@@ -48,6 +48,7 @@ public class PrisonPearlPlugin extends ACivMod {
 	public void onEnable() {
 		super.onEnable();
 		plugin = this;
+		
 		// It would be best to load the storage first so all managers have it available;
 		dbHandle = new DataBaseHandler();
 		dbHandle.getSaveLoadHandler().load();

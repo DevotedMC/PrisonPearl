@@ -110,8 +110,14 @@ public class PrisonPearlFileStorage implements IPrisonPearlStorage{
 				}
 				Location loc = new Location(w, x, y, z);
 				PrisonPearl pp = PrisonPearl.makeFromLocation(imprisonedName, imprisonedUUID, loc, uniqueCount, killerUUID, imprisonTime);
-				pp.setMotd(motd);
-				addPearl(pp);
+				if (pp != null) {
+					pp.setMotd(motd);
+					addPearl(pp);
+				} else {
+					// Pearl was not in a proper container! Freeeeeddooooommm
+					PrisonPearlPlugin.getInstance().warning("Whoever has imprisoned " + imprisonedUUID + " failed to put them in a proper containre. Freeing them");
+					continue;
+				}
 				pearlCount++;
 			}
 			PrisonPearlPlugin.getInstance().info("Loaded " + pearlCount + " pearls from file");

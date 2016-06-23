@@ -59,8 +59,7 @@ public class PrisonPearlUtilShards {
 									loc.getBlockZ());
 							BetterShardsAPI.teleportPlayer(info.getServer(), p.getUniqueId(), info);
 							return BetterShardsAPI.connectPlayer(p, toServer, PlayerChangeServerReason.PLUGIN);
-						}
-						else if (s.isJustCreated()) {
+						} else if (s.isJustCreated()) {
 							if (PrisonPearlConfig.shouldPpsummonClearInventory()) {
 								dropInventory(p, p.getLocation(), PrisonPearlConfig.shouldPpsummonLeavePearls());
 							}
@@ -77,8 +76,7 @@ public class PrisonPearlUtilShards {
 				} catch (PlayerStillDeadException e) {
 					e.printStackTrace();
 				}
-			}
-			else { // For if pearl is on the same server.
+			} else { // For if pearl is on the same server.
 				if (summon.isSummoned(p)) {
 					Summon s = summon.getSummon(p);
 					if (s.isToBeReturned()) {
@@ -87,15 +85,13 @@ public class PrisonPearlUtilShards {
 						Location newLoc = s.getReturnLocation();
 						newLoc.setY(newLoc.getY() + 1);
 						p.teleport(newLoc);
-					}
-					else if (s.isJustCreated()) {
+					} else if (s.isJustCreated()) {
 						if (PrisonPearlConfig.shouldPpsummonClearInventory()) {
 							dropInventory(p, p.getLocation(), PrisonPearlConfig.shouldPpsummonLeavePearls());
 						}
 						p.teleport(s.getPearlLocation());
 					}
-				}
-				else if (!p.getWorld().equals(manager.getPrisonSpawnLocation().getWorld()))
+				}else if (!p.getWorld().equals(manager.getPrisonSpawnLocation().getWorld()))
 					p.teleport(manager.getPrisonSpawnLocation());
 				return true;
 			}
@@ -107,8 +103,7 @@ public class PrisonPearlUtilShards {
 						loc.getBlockZ());
 				BetterShardsAPI.teleportPlayer(loc.getServerName(), uuid, info);
 				return BetterShardsAPI.connectPlayer(p, loc.getServerName(), PlayerChangeServerReason.PLUGIN);
-			}
-			else if (passPearl != null){ // Some other cases.
+			} else if (passPearl != null){ // Some other cases.
 				if (BetterShardsAPI.hasBed(uuid)) { // Like if a player has a bed ;)
 					BedLocation bed = BetterShardsAPI.getBedLocation(uuid);
 					BetterShardsAPI.teleportPlayer(bed.getServer(), uuid, bed.getTeleportInfo());

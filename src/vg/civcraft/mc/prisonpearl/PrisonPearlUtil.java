@@ -51,19 +51,38 @@ public class PrisonPearlUtil {
 		PrisonPearl pp = manager.getByImprisoned(uuid);
 		if (PrisonPearlPlugin.isBetterShardsEnabled() && PrisonPearlPlugin.isMercuryEnabled()) {
 			return PrisonPearlUtilShards.respawnPlayerCorrectlyShards(p, passPearl);
-		}
-		// This part will deal for when bettershards and mercury are not enabled.
-		// This still needs work on, should get reports from non mercury/ BetterShards Servers and they should say whats wrong.
-		else if (manager.isImprisoned(uuid)) {
-			Location newLoc = manager.getPrisonSpawnLocation();
-			p.teleport(newLoc);
+		} else if (manager.isImprisoned(uuid)) {
+			// This part will deal for when bettershards and mercury are not enabled.
+			// This still needs work on, should get reports from non mercury/ BetterShards Servers and they should say whats wrong.
+			if (summon.isSummoned(p)) {
+				Summon s = summon.getSummon(p);
+				if (s.isToBeReturned()) {
+					if (PrisonPearlConfig.getShouldPPReturnKill()) {
+						p.setHealth(0);
+					}
+					Location newLoc = s.getReturnLocation();
+					newLoc.setY(newLoc.getY() + 1);
+					p.teleport(newLoc);
+				} else if (s.isJustCreated()) {
+					if (PrisonPearlConfig.shouldPpsummonClearInventory()) {
+						dropInventory(p, p.getLocation(), PrisonPearlConfig.shouldPpsummonLeavePearls());
+					}
+					p.teleport(s.getPearlLocation());
+				}
+			} else if (!p.getWorld().equals(manager.getPrisonSpawnLocation().getWorld())) {
+				p.teleport(manager.getPrisonSpawnLocation());
+			}
 			return true;
-		}
-		else if (pp != null && freeToPearl) {
-			if (pp.getLocation().getY() < 1.0) {
-				p.teleport(pp.getLocation().add(0,1.0,0));
+			/**Location newLoc = manager.getPrisonSpawnLocation();
+			p.teleport(newLoc);
+			return true;**/
+		} else if (passPearl != null && freeToPearl) {
+			// pp is null b/c manager has already removed it due to /ppfree or throwing the pearl.
+			// so use passPearl instead to free the player.
+			if (passPearl.getLocation().getY() < 1.0) {
+				p.teleport(passPearl.getLocation().add(0,1.0,0));
 			} else {
-				p.teleport(pp.getLocation());
+				p.teleport(passPearl.getLocation());
 			}
 			return true;
 		}

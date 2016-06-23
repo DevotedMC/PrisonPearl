@@ -9,19 +9,20 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 
+import vg.civcraft.mc.prisonpearl.PrisonPearlConfig;
 import vg.civcraft.mc.prisonpearl.PrisonPearlPlugin;
-import vg.civcraft.mc.prisonpearl.managers.AltsListManager;
 import vg.civcraft.mc.prisonpearl.managers.BanManager;
 
 public class BanListener implements Listener{
 	
 	private BanManager ban;
-	private AltsListManager alts;
 	
 	public BanListener() {
-		Bukkit.getPluginManager().registerEvents(this, PrisonPearlPlugin.getInstance());
+		// If not enabled, don't register.
+		if (!PrisonPearlConfig.getShouldEnableAltsManager()) {
+			Bukkit.getPluginManager().registerEvents(this, PrisonPearlPlugin.getInstance());
+		}
 		ban = PrisonPearlPlugin.getBanManager();
-		alts = PrisonPearlPlugin.getAltsListManager();
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)
@@ -52,8 +53,8 @@ public class BanListener implements Listener{
 		}
 		sb.append(" UUID KICK_BANNED");
 		PrisonPearlPlugin.log(sb.toString());
-		if (!PrisonPearlPlugin.isCBanManagementEnabled())
-			event.disallow(
-					AsyncPlayerPreLoginEvent.Result.KICK_BANNED, ban.getBanMessage());
+		if (!PrisonPearlPlugin.isCBanManagementEnabled()) {
+			event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, ban.getBanMessage());
+		}
 	}
 }

@@ -368,8 +368,7 @@ public class PlayerListener implements Listener {
 			return;
 		
 		// announce an prisonpearl if it is clicked
-		ItemStack newitem = announcePearl(
-			(Player) event.getWhoClicked(), event.getCurrentItem());
+		ItemStack newitem = announcePearl((Player) event.getWhoClicked(), event.getCurrentItem());
 		if (newitem != null)
 			event.setCurrentItem(newitem);
 		
