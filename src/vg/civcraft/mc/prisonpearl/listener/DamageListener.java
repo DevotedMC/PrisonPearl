@@ -5,6 +5,8 @@ import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
+import org.bukkit.entity.TippedArrow;
 import org.bukkit.entity.Wolf;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -55,14 +57,22 @@ public class DamageListener implements Listener {
 			damager = (Player) event.getDamager();
 		} else if (event.getDamager() instanceof Wolf) {
 			Wolf wolf = (Wolf) event.getDamager();
-			if (wolf.getOwner() instanceof Player)
+			if (wolf.getOwner() instanceof Player) {
 				damager = (Player) wolf.getOwner();
+			}
 		} else if (event.getDamager() instanceof Arrow) {
 			Arrow arrow = (Arrow) event.getDamager();
-			if (!(arrow.getShooter() instanceof Player))
+			if (!(arrow.getShooter() instanceof Player)) {
 				return;
-
+			}
 			damager = (Player) arrow.getShooter();
+		/*TODO: Seriously review this and see if we're missing any events w/ 1.9 - 1.10
+		 * } else if (event.getDamager() instanceof Projectile) {
+			Projectile general = (Projectile) event.getDamager();
+			if (!(general.getShooter() instanceof Player)) {
+				return;
+			}
+			damager = (Player) general.getShooter();*/
 		}
 
 		if (damager == null || damager == player)

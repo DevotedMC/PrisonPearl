@@ -71,11 +71,12 @@ public class PrisonPearlUtil {
 				}
 			} else if (!p.getWorld().equals(manager.getPrisonSpawnLocation().getWorld())) {
 				p.teleport(manager.getPrisonSpawnLocation());
+			} else {
+				PrisonPearlPlugin.log("Respawning player based on is-imprisoned catchall condition");
+				Location newLoc = manager.getPrisonSpawnLocation();
+				p.teleport(newLoc);
 			}
 			return true;
-			/**Location newLoc = manager.getPrisonSpawnLocation();
-			p.teleport(newLoc);
-			return true;**/
 		} else if (passPearl != null && freeToPearl) {
 			// pp is null b/c manager has already removed it due to /ppfree or throwing the pearl.
 			// so use passPearl instead to free the player.
@@ -85,6 +86,8 @@ public class PrisonPearlUtil {
 				p.teleport(passPearl.getLocation());
 			}
 			return true;
+		} else if (passPearl == null && pp != null) {
+			p.teleport(manager.getPrisonSpawnLocation());
 		}
 		return false;
 	}

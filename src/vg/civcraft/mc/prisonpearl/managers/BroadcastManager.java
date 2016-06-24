@@ -49,15 +49,15 @@ public class BroadcastManager {
 				MercuryManager.requestBroadcast(pearled, receiver);
 			}
 			else 
-				p.sendMessage(ChatColor.GREEN + String.format("You have been sent a request to allow listens to pplocate by %s,"
-						+ " to accept type /ppconfirm <name>", NameLayerManager.getName(receiver)));
+				p.sendMessage(ChatColor.GREEN + String.format("You have been sent a request to allow listens to pplocate by %1$s,"
+						+ " to accept type /ppconfirm %1$s", NameLayerManager.getName(pearled)));
 			request.put(receiver, pearled);
 			return true;
 		}
 		if (p == null)
 			return false;
-		p.sendMessage(ChatColor.GREEN + String.format("You have been sent a request to allow listens to pplocate by %s,"
-				+ " to accept type /ppconfirm <name>", NameLayerManager.getName(receiver)));
+		p.sendMessage(ChatColor.GREEN + String.format("You have been sent a request to allow listens to pplocate by %1$s,"
+				+ " to accept type /ppconfirm %1$s", NameLayerManager.getName(pearled)));
 		request.put(receiver, pearled);
 		return true;
 	}
@@ -71,8 +71,8 @@ public class BroadcastManager {
 		Player p = Bukkit.getPlayer(receiver);
 		if (p == null)
 			return;
-		p.sendMessage(ChatColor.GREEN + String.format("You have been sent a request to allow listens to pplocate by %s,"
-				+ " to accept type /ppconfirm <name>", NameLayerManager.getName(receiver)));
+		p.sendMessage(ChatColor.GREEN + String.format("You have been sent a request to allow listens to pplocate by %1$s,"
+				+ " to accept type /ppconfirm %1$s", NameLayerManager.getName(pearled)));
 		request.put(receiver, pearled);
 	}
 	

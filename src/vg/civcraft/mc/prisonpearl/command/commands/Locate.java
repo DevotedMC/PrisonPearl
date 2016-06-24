@@ -43,9 +43,11 @@ public class Locate extends PlayerCommand{
 			return true;
 		}
 		PrisonPearl pearl = manager.getByImprisoned(p);
-		if (!pearl.verifyLocation())
-			manager.freePearl(pearl, String.format("Prison Pearl %s could not authenticate.", pearl.getImprisonedId().toString()));
-		if (pearl.getLastMoved() + 3000 < System.currentTimeMillis()) { // if its been more than 3 seconds since last update.
+		if (!pearl.verifyLocation() && manager.freePearl(pearl, String.format("Prison Pearl %s could not authenticate.", pearl.getImprisonedId().toString()))) {
+			return true;
+		}
+		if (PrisonPearlPlugin.isMercuryEnabled() && (pearl.getLastMoved() + 3000 < System.currentTimeMillis())) { 
+			// if its been more than 3 seconds since last update.
 			p.sendMessage(ChatColor.YELLOW + "Requesting pplocate.");
 			locate.add(pearl);
 			MercuryManager.requestPPLocate(pearl);

@@ -141,7 +141,11 @@ public class PlayerListener implements Listener {
 		Player player = event.getPlayer();
 
 		if (pearls.isImprisoned(player) && !summon.isSummoned(player)) { // if in prison but not imprisoned
-			respawnPlayerCorrectly(player);
+			if (respawnPlayerCorrectly(player)) {
+				event.setTo(PrisonPearlPlugin.getPrisonPearlManager().getPrisonSpawnLocation());
+			} else {
+				event.setCancelled(true);
+			}
 		}
 	}
 
@@ -294,7 +298,7 @@ public class PlayerListener implements Listener {
 				public void run(){
 					// Check that chunk is still unloaded before freeing
 					if (!world.isChunkLoaded(chunkX, chunkZ)
-						&& pearls.freePearl(pp, pp.getImprisonedName() + "("+
+						&& pearls.freePearl(pp, pp.getImprisonedName() + " ("+
 								pp.getImprisonedId() + ") is being freed. Reason: Chunk with PrisonPearl unloaded."))
 					{
 						entity.remove();
@@ -318,7 +322,7 @@ public class PlayerListener implements Listener {
 		if (pp == null)
 			return;
 		
-		String reason = pp.getImprisonedName() + "("+pp.getImprisonedId() + ") is being freed. Reason: PrisonPearl combusted(lava/fire).";
+		String reason = pp.getImprisonedName() + " ("+pp.getImprisonedId() + ") is being freed. Reason: PrisonPearl combusted(lava/fire).";
 		pearls.freePearl(pp, reason);
 	}
 	
@@ -399,20 +403,19 @@ public class PlayerListener implements Listener {
 					//ee.updateEnderStoragePrison(pearl, event, player.getTargetBlock(new HashSet<Material>(), 5).getLocation());
 				}
 				else{
-				pearl.markMove();
-				updatePearlHolder(pearl, holder, event);
+					pearl.markMove();
+					updatePearlHolder(pearl, holder, event);
 				}
 				if (!(holder instanceof Player) && wb.isMaxFeed(pearl.getLocation())){
 					HumanEntity human = event.getWhoClicked();
 					if (human instanceof Player){
 						Player p = (Player) human;
 						p.sendMessage(ChatColor.GREEN + "The Pearl of " + pearl.getImprisonedName() + " was placed outside of the feed "
-								+ "range, if you leave him here the pearl will be freed restart.");
+								+ "range, if you leave it here the pearl will be freed on restart.");
 					}
 				}
 			}
-		}
-		else if(event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {			
+		} else if(event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {			
 			PrisonPearl pearl = pearls.getPearlByItemStack(event.getCurrentItem());
 			
 			if(pearl != null) {
@@ -433,7 +436,7 @@ public class PlayerListener implements Listener {
 					if (human instanceof Player){
 						Player p = (Player) human;
 						p.sendMessage(ChatColor.GREEN + "The Pearl of " + pearl.getImprisonedName() + " was placed outside of the feed "
-								+ "range, if you leave him here the pearl will be freed restart.");
+								+ "range, if you leave it here the pearl will be freed on restart.");
 					}
 				}
 			}
@@ -563,8 +566,13 @@ public class PlayerListener implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void worldChangeEvent(PlayerTeleportEvent event){
 		TeleportCause cause = event.getCause();
-		if (!cause.equals(TeleportCause.PLUGIN))
+		if (TeleportCause.CHORUS_FRUIT.equals(cause) ||
+			TeleportCause.ENDER_PEARL.equals(cause) ||
+			TeleportCause.UNKNOWN.equals(cause)) {
+			// Normal movement-type events are ignored.
+			// Portalling or plugin world changes are not ignored.
 			return;
+		}
 		List<String> denyWorlds = PrisonPearlConfig.getPearlDenyTransferWorlds();
 		Location previous = event.getFrom();
 		Location to = event.getTo();
@@ -572,10 +580,10 @@ public class PlayerListener implements Listener {
 		if (!denyWorlds.contains(newWorld.getName()))
 			return;
       
-                World oldWorld = previous.getWorld();
-                //not changing worlds, no reason to free pearls
-                if(newWorld.getName().equals(oldWorld.getName()))
-                        return;
+		World oldWorld = previous.getWorld();
+		//not changing worlds, no reason to free pearls
+		if(newWorld.getName().equals(oldWorld.getName()))
+			return;
 		
 		Inventory inv = event.getPlayer().getInventory();
 		boolean message = false;
@@ -674,11 +682,11 @@ public class PlayerListener implements Listener {
 		}
 
 		Player player = event.getPlayer();
-		player.getInventory().setItemInHand(null);
+		player.getInventory().setItemInMainHand(null);
 		event.setCancelled(true);
 
-		freePearl(pp, pp.getImprisonedName() + "("+pp.getImprisonedId() + ") is being freed. Reason: " 
-		+ player.getDisplayName() + " threw the pearl.");
+		freePearl(pp, pp.getImprisonedName() + " ("+pp.getImprisonedId() + ") is being freed. Reason: " 
+				+ player.getDisplayName() + " threw the pearl.");
 		player.sendMessage("You've freed " + pp.getImprisonedName());
 	}
 
@@ -689,7 +697,7 @@ public class PlayerListener implements Listener {
 		if (pp == null)
 			return;
 
-		freePearl(pp, pp.getImprisonedName() + "("+pp.getImprisonedId() + ") is being freed. Reason: PrisonPearl item despawned.");
+		freePearl(pp, pp.getImprisonedName() + " ("+pp.getImprisonedId() + ") is being freed. Reason: PrisonPearl item despawned.");
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR)
@@ -701,7 +709,7 @@ public class PlayerListener implements Listener {
 		PrisonPearl pp = pearls.getPearlByItemStack(s);
 		if (pp == null)
 			return;
-		freePearl(pp, pp.getImprisonedName() + "("+pp.getImprisonedId() + ") is being freed. Reason: PrisonPearl item was destroyed.");
+		freePearl(pp, pp.getImprisonedName() + " ("+pp.getImprisonedId() + ") is being freed. Reason: PrisonPearl item was destroyed.");
 	}
 	
 	public boolean freePlayer(Player player, String reason) {
