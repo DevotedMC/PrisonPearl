@@ -116,10 +116,12 @@ public class SummonFileStorage implements ISummonStorage{
 
 			    UUID id = UUID.fromString(idString);
 				
-				if (!PrisonPearlPlugin.getPrisonPearlManager().isImprisoned(id))
+			    // QUICK FIX: TODO re-evaluate entanglements of Managers and Data Files.
+			    // current load order has a ton of unhandled edge cases.
+				if (!PrisonPearlPlugin.getDBHandler().getStorageHandler().getPrisonPearlStorage().isImprisoned(id))
 					continue;
 				
-				Summon summon = new Summon(id, loc, PrisonPearlPlugin.getPrisonPearlManager().getByImprisoned(id));
+				Summon summon = new Summon(id, loc, PrisonPearlPlugin.getDBHandler().getStorageHandler().getPrisonPearlStorage().getByImprisoned(id));
 				summon.setMaxDistance(dist);
 				summon.setAmountDamage(damage);
 				summon.setCanSpeak(canSpeak);
