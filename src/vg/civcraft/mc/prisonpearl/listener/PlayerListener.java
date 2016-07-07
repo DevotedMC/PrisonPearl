@@ -103,24 +103,26 @@ public class PlayerListener implements Listener {
 		final Player player = event.getPlayer();
 		pearls.updateAttachment(player);
 
-		// In case a player comes from another server and has a pearl.
-		for (ItemStack stack : player.getInventory().getContents()) {
-			if (stack == null)
-				continue;
-			final PrisonPearl pp = pearls.getPearlByItemStack(stack);
-			if (pp == null)
-				continue;
-			// We want to add a scheduler in case the other server sends a FakeLocation and overrides this.
-			// Issue is because the player doesn't quit on the the previous server until after they join this one.
-			Bukkit.getScheduler().runTaskLater(PrisonPearlPlugin.getInstance(), new Runnable() {
-
-				@Override
-				public void run() {
-					pp.setHolder(player);
-					pp.markMove();
-				}
-				
-			}, 20);
+		if (PrisonPearlPlugin.isBetterShardsEnabled()) {
+			// In case a player comes from another server and has a pearl.
+			for (ItemStack stack : player.getInventory().getContents()) {
+				if (stack == null)
+					continue;
+				final PrisonPearl pp = pearls.getPearlByItemStack(stack);
+				if (pp == null)
+					continue;
+				// We want to add a scheduler in case the other server sends a FakeLocation and overrides this.
+				// Issue is because the player doesn't quit on the the previous server until after they join this one.
+				Bukkit.getScheduler().runTaskLater(PrisonPearlPlugin.getInstance(), new Runnable() {
+	
+					@Override
+					public void run() {
+						pp.setHolder(player);
+						pp.markMove();
+					}
+					
+				}, 20);
+			}
 		}
 		
 		if (player.isDead())
@@ -160,18 +162,21 @@ public class PlayerListener implements Listener {
 	// adjust spawnpoint if necessary
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPlayerRespawn(final PlayerRespawnEvent event) {
-		prisonMotd(event.getPlayer());
-		Bukkit.getScheduler().runTask(PrisonPearlPlugin.getInstance(), new Runnable() {
-
-			@Override
-			public void run() {
-				if (summon.isSummoned(event.getPlayer()))
-					summon.returnPlayer(pearls.getByImprisoned(event.getPlayer()));
-				else
-					respawnPlayerCorrectly(event.getPlayer());
-			}
-			
-		});
+		if (pearls.isImprisoned(event.getPlayer())) {
+			PrisonPearlPlugin.doDebug("Player {0} is respawning while pearled.", event.getPlayer().getName());
+			prisonMotd(event.getPlayer());
+			Bukkit.getScheduler().runTask(PrisonPearlPlugin.getInstance(), new Runnable() {
+	
+				@Override
+				public void run() {
+					if (summon.isSummoned(event.getPlayer()))
+						summon.returnPlayer(pearls.getByImprisoned(event.getPlayer()));
+					else
+						respawnPlayerCorrectly(event.getPlayer());
+				}
+				
+			});
+		}
 	}
 
 	// called when a player joins or spawns
@@ -204,7 +209,10 @@ public class PlayerListener implements Listener {
 		
 		PrisonPearl pp = pearls.getByImprisoned(uuid); // find out if the player is imprisoned
 		if (pp != null) { // if imprisoned
-			if (!PrisonPearlConfig.getAllowPrisonStealing() || player.getLocation().getWorld() == pearls.getImprisonWorld()) {// bail if prisoner stealing isn't allowed, or if the player is in prison (can't steal prisoners from prison ever)
+			if (!PrisonPearlConfig.getAllowPrisonStealing() || player.getLocation().getWorld() == pearls.getImprisonWorld()) {
+				// bail if prisoner stealing isn't allowed, or if the player is in prison (can't steal prisoners from prison ever)
+				PrisonPearlPlugin.log("Player: " + playerName + " is already pearled and cannot be stolen here.");
+				
 				// reveal location of pearl to damaging players if pearl stealing is disabled
 				for (Player damager : dlManager.getDamagers(player)) {
 					damager.sendMessage(ChatColor.GREEN+"[PrisonPearl] "+playerName+" cannot be pearled here because they are already "+pp.describeLocation());
@@ -214,8 +222,10 @@ public class PlayerListener implements Listener {
 		}
 		
 		for (Player damager : dlManager.getDamagers(player)) { // check to see if anyone can imprison him
-			if (pp != null && pp.getHolderPlayer() == damager) // if this damager has already imprisoned this person
+			if (pp != null && pp.getHolderPlayer() == damager) { // if this damager has already imprisoned this person
+				PrisonPearlPlugin.log("Player: " + playerName + " is already held by " + damager.getName() + ", cannot re-pearl.");
 				break; // don't be confusing and re-imprison him, just let him die
+			}
 			
 			int firstpearl = Integer.MAX_VALUE; // find the first regular enderpearl in their inventory
 			for (Entry<Integer, ? extends ItemStack> entry : damager.getInventory().all(Material.ENDER_PEARL).entrySet()) {
@@ -231,6 +241,7 @@ public class PlayerListener implements Listener {
 				continue; 
 				
 			if (pearls.imprisonPlayer(uuid, damager)) {// otherwise, try to imprison
+				PrisonPearlPlugin.log("Player " + playerName + " has been imprisoned by " + damager.getName() + ".");
 				damager.sendMessage(ChatColor.GREEN + "You have imprisoned " + player.getDisplayName());
 				player.sendMessage(ChatColor.GREEN + "You have been imprisoned by " + damager.getDisplayName());
 				break;
@@ -412,6 +423,9 @@ public class PlayerListener implements Listener {
 						Player p = (Player) human;
 						p.sendMessage(ChatColor.GREEN + "The Pearl of " + pearl.getImprisonedName() + " was placed outside of the feed "
 								+ "range, if you leave it here the pearl will be freed on restart.");
+						PrisonPearlPlugin.doDebug("The Pearl of {0} was placed outside of the feed "
+								+ "range by {1}, if left here the pearl will be freed on restart.",pearl.getImprisonedName(),
+								p.getDisplayName());
 					}
 				}
 			}
@@ -437,6 +451,9 @@ public class PlayerListener implements Listener {
 						Player p = (Player) human;
 						p.sendMessage(ChatColor.GREEN + "The Pearl of " + pearl.getImprisonedName() + " was placed outside of the feed "
 								+ "range, if you leave it here the pearl will be freed on restart.");
+						PrisonPearlPlugin.doDebug("The Pearl of {0} was placed outside of the feed "
+								+ "range by {1}, if left here the pearl will be freed on restart.",pearl.getImprisonedName(),
+								p.getDisplayName());
 					}
 				}
 			}
@@ -516,6 +533,10 @@ public class PlayerListener implements Listener {
 		} else if (holder instanceof Player) {
 			updatePearl(pearl, (Player) holder);
 		}else {
+			PrisonPearlPlugin.doDebug("Update Pearl Holder for {0}, it has been placed in an unknown container: {1}",
+					pearl, holder.getClass().getClass()
+			);
+
 			event.setCancelled(true);
 		}
 	}

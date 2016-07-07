@@ -158,6 +158,18 @@ public class PrisonPearlPlugin extends ACivMod {
 		plugin.getLogger().log(Level.INFO, message);
 	}
 	
+	public static void doDebug(String message) {
+		if (PrisonPearlConfig.isDebug()) {
+			plugin.getLogger().log(Level.INFO, message);
+		}
+	}
+	
+	public static void doDebug(String message, Object... vars) {
+		if (PrisonPearlConfig.isDebug()) {
+			plugin.getLogger().log(Level.INFO, message, vars);
+		}
+	}
+	
 	public static boolean isNameLayerEnabled() {
 		return Bukkit.getPluginManager().isPluginEnabled("NameLayer");
 	}

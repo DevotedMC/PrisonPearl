@@ -192,4 +192,9 @@ public class PrisonPearlConfig {
 	public static int getPPSaveTicks() {
 		return PrisonPearlPlugin.getInstance().GetConfig().get("ppsaveticks").getInt();
 	}
+
+	@CivConfig(name = "debug", def = "false", type = CivConfigType.Bool)
+	public static boolean isDebug() {
+		return PrisonPearlPlugin.getInstance().GetConfig().get("debug").getBool();
+	}
 }
