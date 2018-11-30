@@ -4,7 +4,7 @@ PrisonPearl
 Minecraft plugin for civcraft which allows players to imprison other players inside ender pearls
 
 Commands: 
-
+```
    pplocate:
       description: Locates your prison pearl
       usage: /<command>
@@ -213,5 +213,5 @@ permissions:
       
    prisonpearl.save:
       description: Allows user to use ppsave command
-   
+```
       
